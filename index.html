@@ -504,15 +504,15 @@ editor.addEventListener('paste', async e => {
   const range = document.getSelection().getRangeAt(0);
   const items = e.clipboardData.items || [];
   const files = e.clipboardData.files || [];
-  
-  // --- 1. 画像貼り付け ---
+
+  // 1️⃣ 画像の処理
   for (const item of items) {
     if (item.type.startsWith('image/')) {
       const file = item.getAsFile();
       const reader = new FileReader();
       reader.onload = () => {
         const img = document.createElement('img');
-        img.src = reader.result;
+        img.src = reader.result; // base64
         range.insertNode(img);
         range.collapse(false);
         saveMemo();
@@ -521,6 +521,7 @@ editor.addEventListener('paste', async e => {
       return;
     }
   }
+
   if (files.length > 0 && files[0].type.startsWith('image/')) {
     const reader = new FileReader();
     reader.onload = () => {
@@ -534,11 +535,15 @@ editor.addEventListener('paste', async e => {
     return;
   }
 
-  // --- 2. テキスト貼り付け ---
+  // 2️⃣ テキスト処理
   const text = e.clipboardData.getData('text/plain');
+  const url = text.trim();
 
-  // YouTube
-  const yt = text.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  // helper: insert element and collapse
+  const insertEl = (el) => { range.insertNode(el); range.collapse(false); saveMemo(); };
+
+  // 2-1. YouTube
+  let yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
   if (yt) {
     const wrap = document.createElement('div');
     wrap.className = 'video';
@@ -546,101 +551,84 @@ editor.addEventListener('paste', async e => {
     iframe.src = `https://www.youtube-nocookie.com/embed/${yt[1]}?modestbranding=1&rel=0&playsinline=1`;
     iframe.allowFullscreen = true;
     wrap.appendChild(iframe);
-    range.insertNode(wrap);
-    range.collapse(false);
-    saveMemo();
+    insertEl(wrap);
     return;
   }
 
-  // TikTok
-  const tiktok = text.match(/https?:\/\/(?:www\.)?tiktok\.com\/[@\w]+\/video\/\d+/);
-  if (tiktok) {
+  // 2-2. ニコニコ動画
+  let nico = url.match(/nicovideo\.jp\/watch\/([\w]+)/);
+  if (nico) {
+    const wrap = document.createElement('iframe');
+    wrap.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
+    wrap.width = "560"; wrap.height = "315";
+    wrap.frameBorder = "0";
+    insertEl(wrap);
+    return;
+  }
+
+  // 2-3. Twitter/X
+  let tw = url.match(/(?:twitter\.com|x\.com)\/[^/]+\/status\/(\d+)/);
+  if (tw) {
+    const block = document.createElement('blockquote');
+    block.className = 'twitter-tweet';
+    const a = document.createElement('a');
+    a.href = url;
+    block.appendChild(a);
+    insertEl(block);
+    if (window.twttr && window.twttr.widgets) window.twttr.widgets.load(editor);
+    return;
+  }
+
+  // 2-4. TikTok
+  let tt = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
+  if (tt) {
     const wrap = document.createElement('blockquote');
     wrap.className = 'tiktok-embed';
-    wrap.setAttribute('cite', tiktok[0]);
-    wrap.setAttribute('data-video-id', tiktok[0].split('/').pop());
-    wrap.style = 'max-width: 605px;min-width: 325px;';
-    range.insertNode(wrap);
-    range.collapse(false);
-    saveMemo();
+    wrap.dataset.videoId = tt[1];
+    const a = document.createElement('a');
+    a.href = url;
+    wrap.appendChild(a);
+    insertEl(wrap);
     if (window.tiktokEmbed) window.tiktokEmbed.load();
     return;
   }
 
-  // Twitter/X
-  const twitter = text.match(/https?:\/\/(?:twitter\.com|x\.com)\/[A-Za-z0-9_]+\/status\/\d+/);
-  if (twitter) {
-    const block = document.createElement('blockquote');
-    block.className = 'twitter-tweet';
-    const a = document.createElement('a');
-    a.href = twitter[0];
-    block.appendChild(a);
-    range.insertNode(block);
-    range.collapse(false);
-    saveMemo();
-    if (window.twttr) twttr.widgets.load(block);
-    return;
-  }
-
-  // Instagram
-  const insta = text.match(/https?:\/\/(?:www\.)?instagram\.com\/p\/[\w-]+/);
-  if (insta) {
+  // 2-5. Instagram
+  let ig = url.match(/instagram\.com\/p\/([\w-]+)/);
+  if (ig) {
     const block = document.createElement('blockquote');
     block.className = 'instagram-media';
-    block.setAttribute('data-instgrm-permalink', insta[0]);
-    block.setAttribute('data-instgrm-version', '14');
-    range.insertNode(block);
-    range.collapse(false);
-    saveMemo();
-    if (window.instgrm) instgrm.Embeds.process();
+    block.dataset.instgrmCaptioned = "true";
+    const a = document.createElement('a');
+    a.href = url;
+    block.appendChild(a);
+    insertEl(block);
+    if (window.instgrm) window.instgrm.Embeds.process();
     return;
   }
 
-  // Facebook
-  const fb = text.match(/https?:\/\/(?:www\.)?facebook\.com\/[\w.-]+\/posts\/\d+/);
+  // 2-6. Facebook
+  let fb = url.match(/facebook\.com\/[^/]+\/posts\/(\d+)/);
   if (fb) {
     const div = document.createElement('div');
     div.className = 'fb-post';
-    div.setAttribute('data-href', fb[0]);
-    div.setAttribute('data-show-text', 'true');
-    range.insertNode(div);
-    range.collapse(false);
-    saveMemo();
-    if (window.FB) FB.XFBML.parse(div);
+    div.dataset.href = url;
+    insertEl(div);
+    if (window.FB) FB.XFBML.parse(editor);
     return;
   }
 
-  // ニコニコ動画
-  const nico = text.match(/https?:\/\/(?:www\.)?nicovideo\.jp\/watch\/\w+/);
-  if (nico) {
-    const id = nico[0].split('/').pop();
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://embed.nicovideo.jp/watch/${id}`;
-    iframe.width = '560';
-    iframe.height = '315';
-    iframe.allowFullscreen = true;
-    range.insertNode(iframe);
-    range.collapse(false);
-    saveMemo();
-    return;
-  }
-
-  // --- 3. 画像URL（末尾が png/jpg/jpeg/gif） ---
-  const urlRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
-  const m = text.match(urlRegex);
-  if (m) {
+  // 2-7. 画像URL直接
+  const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
+  if (imgRegex.test(url)) {
     const img = document.createElement('img');
-    img.src = m[0];
-    range.insertNode(img);
-    range.collapse(false);
-    saveMemo();
+    img.src = url;
+    insertEl(img);
     return;
   }
 
-  // --- 4. 通常テキスト ---
-  range.insertNode(document.createTextNode(text));
-  range.collapse(false);
-  saveMemo();
+  // 2-8. 通常テキスト
+  insertEl(document.createTextNode(url));
 });
 
 /* Preview */
