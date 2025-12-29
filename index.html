@@ -504,8 +504,8 @@ editor.addEventListener('paste', async e => {
   const range = document.getSelection().getRangeAt(0);
   const items = e.clipboardData.items || [];
   const files = e.clipboardData.files || [];
-
-  // 1. クリップボードに画像があればそのまま挿入
+  
+  // --- 1. 画像貼り付け ---
   for (const item of items) {
     if (item.type.startsWith('image/')) {
       const file = item.getAsFile();
@@ -534,7 +534,7 @@ editor.addEventListener('paste', async e => {
     return;
   }
 
-  // 2. テキスト取得
+  // --- 2. テキスト貼り付け ---
   const text = e.clipboardData.getData('text/plain');
 
   // YouTube
@@ -552,73 +552,72 @@ editor.addEventListener('paste', async e => {
     return;
   }
 
-  // X(Twitter)
-  const tw = text.match(/https?:\/\/(?:www\.)?twitter\.com\/\w+\/status\/(\d+)/);
-  if (tw) {
-    const block = document.createElement('blockquote');
-    block.className = 'twitter-tweet';
-    block.innerHTML = `<a href="${tw[0]}"></a>`;
-    range.insertNode(block);
-    range.collapse(false);
-    if (window.twttr) twttr.widgets.load();
-    saveMemo();
-    return;
-  }
-
-  // ニコニコ動画
-  const nico = text.match(/https?:\/\/(?:www\.)?nicovideo\.jp\/watch\/(\w+)/);
-  if (nico) {
-    const wrap = document.createElement('iframe');
-    wrap.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
-    wrap.width = "560";
-    wrap.height = "315";
-    wrap.allowFullscreen = true;
+  // TikTok
+  const tiktok = text.match(/https?:\/\/(?:www\.)?tiktok\.com\/[@\w]+\/video\/\d+/);
+  if (tiktok) {
+    const wrap = document.createElement('blockquote');
+    wrap.className = 'tiktok-embed';
+    wrap.setAttribute('cite', tiktok[0]);
+    wrap.setAttribute('data-video-id', tiktok[0].split('/').pop());
+    wrap.style = 'max-width: 605px;min-width: 325px;';
     range.insertNode(wrap);
     range.collapse(false);
     saveMemo();
+    if (window.tiktokEmbed) window.tiktokEmbed.load();
     return;
   }
 
-  // TikTok
-  const tiktok = text.match(/https?:\/\/(?:www\.)?tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
-  if (tiktok) {
+  // Twitter/X
+  const twitter = text.match(/https?:\/\/(?:twitter\.com|x\.com)\/[A-Za-z0-9_]+\/status\/\d+/);
+  if (twitter) {
     const block = document.createElement('blockquote');
-    block.className = 'tiktok-embed';
-    block.setAttribute('cite', tiktok[0]);
-    block.setAttribute('data-video-id', tiktok[1]);
-    block.setAttribute('style', 'max-width: 605px; min-width: 325px;');
-    block.innerHTML = `<section></section>`;
+    block.className = 'twitter-tweet';
+    const a = document.createElement('a');
+    a.href = twitter[0];
+    block.appendChild(a);
     range.insertNode(block);
     range.collapse(false);
-    if (window.tiktokEmbed) window.tiktokEmbed.load(); // TikTok公式スクリプトが必要
     saveMemo();
+    if (window.twttr) twttr.widgets.load(block);
     return;
   }
 
   // Instagram
-  const insta = text.match(/https?:\/\/(?:www\.)?instagram\.com\/p\/([\w-]+)/);
+  const insta = text.match(/https?:\/\/(?:www\.)?instagram\.com\/p\/[\w-]+/);
   if (insta) {
     const block = document.createElement('blockquote');
     block.className = 'instagram-media';
-    block.setAttribute('data-instgrm-permalink', `https://www.instagram.com/p/${insta[1]}/`);
+    block.setAttribute('data-instgrm-permalink', insta[0]);
     block.setAttribute('data-instgrm-version', '14');
     range.insertNode(block);
     range.collapse(false);
-    if (window.instgrm) instgrm.Embeds.process(); // Instagram公式スクリプトが必要
     saveMemo();
+    if (window.instgrm) instgrm.Embeds.process();
     return;
   }
 
   // Facebook
-  const fb = text.match(/https?:\/\/(?:www\.)?facebook\.com\/.*\/posts\/(\d+)/);
+  const fb = text.match(/https?:\/\/(?:www\.)?facebook\.com\/[\w.-]+\/posts\/\d+/);
   if (fb) {
+    const div = document.createElement('div');
+    div.className = 'fb-post';
+    div.setAttribute('data-href', fb[0]);
+    div.setAttribute('data-show-text', 'true');
+    range.insertNode(div);
+    range.collapse(false);
+    saveMemo();
+    if (window.FB) FB.XFBML.parse(div);
+    return;
+  }
+
+  // ニコニコ動画
+  const nico = text.match(/https?:\/\/(?:www\.)?nicovideo\.jp\/watch\/\w+/);
+  if (nico) {
+    const id = nico[0].split('/').pop();
     const iframe = document.createElement('iframe');
-    iframe.src = `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(fb[0])}&show_text=true&width=500`;
-    iframe.width = "500";
-    iframe.height = "600";
-    iframe.style.border = "none";
-    iframe.style.overflow = "hidden";
-    iframe.scrolling = "no";
+    iframe.src = `https://embed.nicovideo.jp/watch/${id}`;
+    iframe.width = '560';
+    iframe.height = '315';
     iframe.allowFullscreen = true;
     range.insertNode(iframe);
     range.collapse(false);
@@ -626,19 +625,19 @@ editor.addEventListener('paste', async e => {
     return;
   }
 
-  // 画像URL
+  // --- 3. 画像URL（末尾が png/jpg/jpeg/gif） ---
   const urlRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
-  const imgMatch = text.match(urlRegex);
-  if (imgMatch) {
+  const m = text.match(urlRegex);
+  if (m) {
     const img = document.createElement('img');
-    img.src = imgMatch[0];
+    img.src = m[0];
     range.insertNode(img);
     range.collapse(false);
     saveMemo();
     return;
   }
 
-  // 最後に通常テキスト
+  // --- 4. 通常テキスト ---
   range.insertNode(document.createTextNode(text));
   range.collapse(false);
   saveMemo();
@@ -722,6 +721,12 @@ async function navigate(){
 /* 初期化 */
 // navigate();
 </script>
+<!-- SNS埋め込み用スクリプト -->
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<script async src="https://www.tiktok.com/embed.js"></script>
+<script async src="//www.instagram.com/embed.js"></script>
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v17.0"></script>
 </body>
 </html>
   
