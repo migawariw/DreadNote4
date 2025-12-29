@@ -888,6 +888,7 @@ if ( nico ) {
   iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
   iframe.setAttribute('frameborder', '0');
   iframe.setAttribute('allowfullscreen', ''); // ここが重要
+  iframe.setAttribute('allow', 'fullscreen');
   wrap.appendChild(iframe);
 
   insertEl(wrap);
