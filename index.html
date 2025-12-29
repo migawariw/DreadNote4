@@ -498,6 +498,60 @@ async function updateMeta(id, fields){
 }
 // updateMeta(currentMemoId, title);
 
+editor.addEventListener('paste', e => {
+  e.preventDefault();
+  const range = document.getSelection().getRangeAt(0);
+  const text = e.clipboardData.getData('text/plain');
+
+  // URL判定
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urls = text.match(urlRegex);
+
+  if (urls) {
+    urls.forEach(url => {
+      const card = document.createElement('div');
+      card.style.border = '1px solid #ccc';
+      card.style.borderRadius = '8px';
+      card.style.padding = '8px';
+      card.style.margin = '8px 0';
+      card.style.display = 'flex';
+      card.style.alignItems = 'center';
+      card.style.gap = '8px';
+      card.style.background = '#f9f9f9';
+
+      // favicon
+      const favicon = document.createElement('img');
+      try {
+        const u = new URL(url);
+        favicon.src = `${u.origin}/favicon.ico`;
+      } catch { 
+        favicon.src = '';
+      }
+      favicon.width = 16;
+      favicon.height = 16;
+      favicon.onerror = () => { favicon.style.display = 'none'; }
+
+      // URLリンク
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.textContent = url;
+      link.style.wordBreak = 'break-all';
+      link.style.color = '#0077cc';
+      link.style.textDecoration = 'none';
+
+      card.append(favicon, link);
+      range.insertNode(card);
+      range.collapse(false);
+    });
+  } else {
+    range.insertNode(document.createTextNode(text));
+    range.collapse(false);
+  }
+
+  saveMemo();
+});
+
 /* Paste処理（Base64 直接保存版） */
 editor.addEventListener('paste', async e => {
   e.preventDefault();
