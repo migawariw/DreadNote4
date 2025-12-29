@@ -71,6 +71,7 @@
       border: none;
       background: transparent;
       color: inherit;
+      font-size: 21px;
     }
 
     #editor {
@@ -79,10 +80,10 @@
       white-space: pre-wrap;
       word-break: break-word;
       border-top: 1px solid #ccc;
-      padding-top: 18px;
+      padding-top: 17px;
 
       /* iPhoneメモ風 16pxから変更*/
-      font-size: 18px;
+      font-size: 17px;
       line-height: 1.75;
       letter-spacing: 0.025em;
       color: #1c1c1e;
@@ -300,6 +301,19 @@
     body.dark #editor a {
       color: #f2f2f7;
     }
+
+    body.dark #user-menu button:hover {
+      background: #333;
+    }
+
+    body.dark .menu-popup button:hover {
+      background: #333;
+    }
+
+
+
+    
+
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -859,84 +873,84 @@
         return;
       }
 
-    //   // 2-7. 通常URL（カード＋生URL表示）
-    //   const linkRegex = /^https?:\/\/\S+$/;
-    //   if ( linkRegex.test( url ) ) {
-    //     const container = document.createElement( 'div' );
-    //     container.style.margin = '8px 0';
+      //   // 2-7. 通常URL（カード＋生URL表示）
+      //   const linkRegex = /^https?:\/\/\S+$/;
+      //   if ( linkRegex.test( url ) ) {
+      //     const container = document.createElement( 'div' );
+      //     container.style.margin = '8px 0';
 
-    //     // カード本体
-    //     const card = document.createElement( 'div' );
-    //     card.style.border = '1px solid #ddd';
-    //     card.style.borderRadius = '6px';
-    //     card.style.padding = '8px';
-    //     card.style.display = 'flex';
-    //     card.style.alignItems = 'center';
-    //     card.style.gap = '8px';
-    //     card.style.cursor = 'pointer';
-    //     card.contentEditable = false;
+      //     // カード本体
+      //     const card = document.createElement( 'div' );
+      //     card.style.border = '1px solid #ddd';
+      //     card.style.borderRadius = '6px';
+      //     card.style.padding = '8px';
+      //     card.style.display = 'flex';
+      //     card.style.alignItems = 'center';
+      //     card.style.gap = '8px';
+      //     card.style.cursor = 'pointer';
+      //     card.contentEditable = false;
 
-    //     const icon = document.createElement( 'img' );
-    //     icon.src = 'https://www.google.com/s2/favicons?domain=' + url;
-    //     icon.width = 16;
-    //     icon.height = 16;
+      //     const icon = document.createElement( 'img' );
+      //     icon.src = 'https://www.google.com/s2/favicons?domain=' + url;
+      //     icon.width = 16;
+      //     icon.height = 16;
 
-    //     const titleSpan = document.createElement( 'span' );
-    //     titleSpan.style.fontWeight = 'bold';
-    //     titleSpan.style.fontSize = '0.9em';
-    //     titleSpan.style.overflow = 'hidden';
-    //     titleSpan.style.textOverflow = 'ellipsis';
-    //     titleSpan.style.whiteSpace = 'nowrap';
+      //     const titleSpan = document.createElement( 'span' );
+      //     titleSpan.style.fontWeight = 'bold';
+      //     titleSpan.style.fontSize = '0.9em';
+      //     titleSpan.style.overflow = 'hidden';
+      //     titleSpan.style.textOverflow = 'ellipsis';
+      //     titleSpan.style.whiteSpace = 'nowrap';
 
-    //     // タイトル取得（失敗したら必ずホスト名）
-    //     ( async () => {
-    //       let text = '';
+      //     // タイトル取得（失敗したら必ずホスト名）
+      //     ( async () => {
+      //       let text = '';
 
-    //       try {
-    //         const res = await fetch( url, { mode: 'cors' } );
-    //         const html = await res.text();
-    //         const doc = new DOMParser().parseFromString( html, 'text/html' );
-    //         const title = doc.querySelector( 'title' )?.innerText?.trim();
-    //         if ( title ) text = title;
-    //       } catch { }
+      //       try {
+      //         const res = await fetch( url, { mode: 'cors' } );
+      //         const html = await res.text();
+      //         const doc = new DOMParser().parseFromString( html, 'text/html' );
+      //         const title = doc.querySelector( 'title' )?.innerText?.trim();
+      //         if ( title ) text = title;
+      //       } catch { }
 
-    //       // フォールバック：ホスト名
-    //       if ( !text ) {
-    //         try {
-    //           text = new URL( url ).hostname;
-    //         } catch { }
-    //       }
+      //       // フォールバック：ホスト名
+      //       if ( !text ) {
+      //         try {
+      //           text = new URL( url ).hostname;
+      //         } catch { }
+      //       }
 
-    //       if ( text ) {
-    //         titleSpan.textContent = text;
-    //         titleSpan.style.display = '';
-    //       } else {
-    //         titleSpan.style.display = 'none';
-    //       }
-    //     } )();
+      //       if ( text ) {
+      //         titleSpan.textContent = text;
+      //         titleSpan.style.display = '';
+      //       } else {
+      //         titleSpan.style.display = 'none';
+      //       }
+      //     } )();
 
-    //     card.append( icon, titleSpan );
+      //     card.append( icon, titleSpan );
 
-    //     card.addEventListener( 'click', e => {
-    //       e.preventDefault();
-    //       e.stopPropagation();
-    //       window.open( url, '_blank', 'noopener' );
-    //     } );
+      //     card.addEventListener( 'click', e => {
+      //       e.preventDefault();
+      //       e.stopPropagation();
+      //       window.open( url, '_blank', 'noopener' );
+      //     } );
 
-    //     // 生リンク（いじらない）
-    //     const linkLine = document.createElement( 'a' );
-    //     linkLine.href = url;
-    //     linkLine.textContent = url;
-    //     linkLine.target = '_blank';
-    //     linkLine.rel = 'noopener';
-    //     linkLine.style.display = 'block';
-    //     linkLine.style.marginTop = '4px';
+      //     // 生リンク（いじらない）
+      //     const linkLine = document.createElement( 'a' );
+      //     linkLine.href = url;
+      //     linkLine.textContent = url;
+      //     linkLine.target = '_blank';
+      //     linkLine.rel = 'noopener';
+      //     linkLine.style.display = 'block';
+      //     linkLine.style.marginTop = '4px';
 
-    //     container.append( card, linkLine );
-    //     insertEl( container );
-    //     return;
-    //   }
-    //   // 2-8. 通常テキスト
+      //     container.append( card, linkLine );
+      //     insertEl( container );
+      //     return;
+      //   }
+      //   // 2-8. 通常テキスト
       insertEl( document.createTextNode( url ) );
     } );
 
