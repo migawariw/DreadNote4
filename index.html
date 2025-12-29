@@ -894,6 +894,24 @@ if ( nico ) {
   insertEl(wrap);
   return;
 }
+// 2-3. TikTok
+const tiktok = url.match(/https:\/\/(www\.)?tiktok\.com\/.*\/video\/(\d+)/);
+if (tiktok) {
+  const videoId = tiktok[2];
+  const wrap = document.createElement('div');
+  wrap.className = 'video';
+
+  const iframe = document.createElement('iframe');
+  iframe.src = `https://www.tiktok.com/embed/${videoId}`;
+  iframe.allow = "autoplay; fullscreen";
+  iframe.allowFullscreen = true;
+
+  wrap.appendChild(iframe);
+  range.insertNode(wrap);
+  range.collapse(false);
+  saveMemo();
+  return;
+}
 
       // 2-6. 画像
 
