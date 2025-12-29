@@ -877,14 +877,19 @@
       }
 
       // 2-2. ニコニコ動画
-      let nico = url.match( /nicovideo\.jp\/watch\/([\w]+)/ );
-      if ( nico ) {
-        const wrap = document.createElement( 'iframe' );
-        wrap.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
-        wrap.frameBorder = "0";
-        insertEl( wrap );
-        return;
-      }
+      // ニコニコ動画
+let nico = url.match( /nicovideo\.jp\/watch\/([\w]+)/ );
+if ( nico ) {
+  const wrap = document.createElement( 'div' );
+  wrap.className = 'video';  // YouTubeと同じクラス名でスタイルを共通化
+  const iframe = document.createElement( 'iframe' );
+  iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
+  iframe.frameBorder = "0";
+  iframe.allowFullscreen = true;  // YouTubeに合わせて追加
+  wrap.appendChild( iframe );
+  insertEl( wrap );
+  return;
+}
 
 
       // 2-6. 画像
