@@ -92,12 +92,13 @@
 
     #editor a {
       color: #1c1c1e;
-      /* iOSリンクブルー */
       text-decoration: none;
     }
 
-    #editor a:hover {
-      text-decoration: underline;
+    #editor a:hover,
+    #editor a:focus,
+    #editor a:active {
+      text-decoration: none;
     }
 
 
@@ -266,6 +267,7 @@
         <img id="user-icon" src="" title="User Menu">
         <div id="user-menu">
           <button id="switch-account">アカウント切替</button>
+          <button id="dark-btn">ダークモード</button>
           <button id="logout-btn">LogOut</button>
         </div>
       </div>
