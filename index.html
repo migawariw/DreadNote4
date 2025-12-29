@@ -84,14 +84,14 @@
 
       /* iPhoneメモ風 */
       font-size: 16px;
-      line-height: 1.7;
-      letter-spacing: 0.02em;
+      line-height: 1.75;
+      letter-spacing: 0.025em;
       color: #1c1c1e;
       /* iOS標準テキスト色 */
     }
 
     #editor a {
-      color: #007aff;
+      color: #1c1c1e;
       /* iOSリンクブルー */
       text-decoration: none;
     }
@@ -840,12 +840,28 @@
         icon.height = 16;
 
         const titleSpan = document.createElement('span');
-        titleSpan.textContent = url;
         titleSpan.style.fontWeight = 'bold';
         titleSpan.style.fontSize = '0.9em';
         titleSpan.style.overflow = 'hidden';
         titleSpan.style.textOverflow = 'ellipsis';
         titleSpan.style.whiteSpace = 'nowrap';
+
+        // タイトル取得（失敗したら非表示）
+        (async () => {
+          try {
+            const res = await fetch(url, { mode: 'cors' });
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const title = doc.querySelector('title')?.innerText?.trim();
+            if (title) {
+              titleSpan.textContent = title;
+            } else {
+              titleSpan.style.display = 'none';
+            }
+          } catch {
+            titleSpan.style.display = 'none';
+          }
+        })();
 
         card.append(icon, titleSpan);
 
