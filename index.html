@@ -81,7 +81,25 @@
       word-break: break-word;
       border-top: 1px solid #ccc;
       padding-top: 16px;
+
+      /* iPhoneメモ風 */
+      font-size: 16px;
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+      color: #1c1c1e;
+      /* iOS標準テキスト色 */
     }
+
+    #editor a {
+      color: #007aff;
+      /* iOSリンクブルー */
+      text-decoration: none;
+    }
+
+    #editor a:hover {
+      text-decoration: underline;
+    }
+
 
     img {
       max-width: 100%;
@@ -777,43 +795,10 @@
       }
 
 
-      // 2-6. PDF（1ページ目を画像として表示）
-      const pdfRegex = /https?:\/\/\S+\.pdf/i;
-      if ( pdfRegex.test( url ) ) {
+      // 2-6. PDF（1ページ目だけ表示＋リンク）
+      // 画像URL直接（クリックで元URLを開く）
+      // 2-6. PDF（1ページ目表示＋確実に開けるリンク）
 
-        pdfjsLib.GlobalWorkerOptions.workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        const pdf = await pdfjsLib.getDocument( url ).promise;
-        const page = await pdf.getPage( 1 );
-
-        const scale = 1.5;
-        const viewport = page.getViewport( { scale } );
-
-        const canvas = document.createElement( 'canvas' );
-        const ctx = canvas.getContext( '2d' );
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        await page.render( {
-          canvasContext: ctx,
-          viewport
-        } ).promise;
-
-        canvas.style.maxWidth = '100%';
-        canvas.style.display = 'block';
-        canvas.style.margin = '8px 0';
-        canvas.style.cursor = 'pointer';
-
-        canvas.addEventListener( 'click', e => {
-          e.preventDefault();
-          e.stopPropagation();
-          window.open( url, '_blank', 'noopener' );
-        } );
-
-        insertEl( canvas );
-        return;
-      }
       const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
       if ( imgRegex.test( url ) ) {
         const img = document.createElement( 'img' );
@@ -832,7 +817,19 @@
       // 2-7. 画像URL直接（リンク付き）
       // PDF（1ページ目だけ表示・クリックで原本）
 
+      // 2-7. 通常URL（テキストリンク化）
+      const linkRegex = /^https?:\/\/\S+$/;
+      if ( linkRegex.test( url ) ) {
+        const a = document.createElement( 'a' );
+        a.href = url;
+        a.textContent = url;
+        a.target = '_blank';
+        a.rel = 'noopener';
 
+        // 見た目はCSSに任せる
+        insertEl( a );
+        return;
+      }
       // 2-8. 通常テキスト
       insertEl( document.createTextNode( url ) );
     } );
