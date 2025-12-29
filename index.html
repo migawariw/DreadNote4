@@ -777,14 +777,12 @@
       }
 
 
-
       // 2-6. PDF（1ページ目だけ表示＋リンク）
+      // 画像URL直接（クリックで元URLを開く）
+      // 2-6. PDF（1ページ目表示＋確実に開けるリンク）
       const pdfRegex = /https?:\/\/\S+\.pdf/i;
       if ( pdfRegex.test( url ) ) {
-        const a = document.createElement( 'a' );
-        a.href = url;
-        a.target = '_blank';
-        a.rel = 'noopener';
+        const wrap = document.createElement( 'div' );
 
         const iframe = document.createElement( 'iframe' );
         iframe.src = url + '#page=1&view=FitH';
@@ -792,25 +790,41 @@
         iframe.style.height = '600px';
         iframe.style.border = '1px solid #ccc';
 
-        a.appendChild( iframe );
-        insertEl( a );
+        const link = document.createElement( 'div' );
+        link.textContent = '▶ PDFを開く';
+        link.style.cursor = 'pointer';
+        link.style.color = '#06c';
+        link.style.margin = '4px 0';
+
+        link.addEventListener( 'click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open( url, '_blank', 'noopener' );
+        } );
+
+        wrap.appendChild( iframe );
+        wrap.appendChild( link );
+        insertEl( wrap );
+        return;
+      }
+      const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
+      if ( imgRegex.test( url ) ) {
+        const img = document.createElement( 'img' );
+        img.src = url;
+        img.style.cursor = 'pointer';
+
+        img.addEventListener( 'click', e => {
+          e.preventDefault();
+          e.stopPropagation(); // ← 超重要
+          window.open( url, '_blank', 'noopener' );
+        } );
+
+        insertEl( img );
         return;
       }
       // 2-7. 画像URL直接（リンク付き）
-      const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
-      if ( imgRegex.test( url ) ) {
-        const a = document.createElement( 'a' );
-        a.href = url;
-        a.target = '_blank';
-        a.rel = 'noopener';
+      // PDF（1ページ目だけ表示・クリックで原本）
 
-        const img = document.createElement( 'img' );
-        img.src = url;
-
-        a.appendChild( img );
-        insertEl( a );
-        return;
-      }
 
       // 2-8. 通常テキスト
       insertEl( document.createTextNode( url ) );
