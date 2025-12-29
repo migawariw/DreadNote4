@@ -846,7 +846,7 @@
         titleSpan.style.textOverflow = 'ellipsis';
         titleSpan.style.whiteSpace = 'nowrap';
 
-        // タイトル取得（失敗したら非表示）
+        // タイトル取得（失敗したらホスト名を表示）
         (async () => {
           try {
             const res = await fetch(url, { mode: 'cors' });
@@ -855,9 +855,16 @@
             const title = doc.querySelector('title')?.innerText?.trim();
             if (title) {
               titleSpan.textContent = title;
-            } else {
-              titleSpan.style.display = 'none';
+              return;
             }
+          } catch (e) {
+            // CORSなどはここに来る
+          }
+
+          // フォールバック：ホスト名
+          try {
+            const u = new URL(url);
+            titleSpan.textContent = u.hostname;
           } catch {
             titleSpan.style.display = 'none';
           }
