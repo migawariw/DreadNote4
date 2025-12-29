@@ -10,9 +10,9 @@
   <style>
     body {
       margin: 0;
-      padding: 16px;
+      padding: 17px;
       font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-      font-size: 16px;
+      font-size: 17px;
       background: #ffffff;
       color: #1c1c1e;
     }
@@ -29,7 +29,7 @@
 
     input,
     button {
-      font-size: 16px;
+      font-size: 17px;
       margin: 4px 0;
     }
 
@@ -68,12 +68,9 @@
     }
 
     #title {
-      width: 100%;
-      font-size: 20px;
-      margin: 8px 0;
       border: none;
-      padding: 0;
-      box-sizing: border-box;
+      background: transparent;
+      color: inherit;
     }
 
     #editor {
@@ -82,10 +79,10 @@
       white-space: pre-wrap;
       word-break: break-word;
       border-top: 1px solid #ccc;
-      padding-top: 16px;
+      padding-top: 18px;
 
-      /* iPhoneメモ風 */
-      font-size: 16px;
+      /* iPhoneメモ風 16pxから変更*/
+      font-size: 18px;
       line-height: 1.75;
       letter-spacing: 0.025em;
       color: #1c1c1e;
@@ -185,7 +182,7 @@
 
     #user-menu {
       position: absolute;
-      top: 40px;
+      top: 55px;
       right: 0;
       background: #ffffff;
       border: 1px solid #ddd;
@@ -193,7 +190,7 @@
       display: none;
       z-index: 100;
       white-space: nowrap;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       overflow: hidden;
     }
 
@@ -336,7 +333,7 @@
 
   <section id="view-trash" hidden>
     <div class="flex-between">
-      <h2>Trash🗑️</h2>
+      <h2>Trash 🗑️</h2>
       <button id="back-list"> ← </button>
     </div>
     <ul id="trash-list"></ul>
@@ -384,22 +381,22 @@
     const userMenu = document.getElementById( 'user-menu' );
 
     // Dark mode toggle
-    const darkBtn = document.getElementById('dark-btn');
+    const darkBtn = document.getElementById( 'dark-btn' );
 
-    if (darkBtn) {
-      darkBtn.onclick = (e) => {
+    if ( darkBtn ) {
+      darkBtn.onclick = ( e ) => {
         e.stopPropagation();
-        document.body.classList.toggle('dark');
+        document.body.classList.toggle( 'dark' );
         localStorage.setItem(
           'dreadnote-dark',
-          document.body.classList.contains('dark') ? '1' : '0'
+          document.body.classList.contains( 'dark' ) ? '1' : '0'
         );
       };
     }
 
     // 初期化（保存状態を反映）
-    if (localStorage.getItem('dreadnote-dark') === '1') {
-      document.body.classList.add('dark');
+    if ( localStorage.getItem( 'dreadnote-dark' ) === '1' ) {
+      document.body.classList.add( 'dark' );
     }
     const toast = document.getElementById( 'toast' );
     const preview = document.getElementById( 'preview' );
@@ -422,14 +419,14 @@
     document.getElementById( 'signup' ).onclick = async () => { try { await createUserWithEmailAndPassword( auth, emailInput.value, passwordInput.value ); } catch ( e ) { showToast( "サインアップ失敗: " + e.message ); } };
     document.getElementById( 'google-login' ).onclick = async () => { try { await signInWithPopup( auth, provider ); } catch ( e ) { showToast( "Googleログイン失敗: " + e.message ); } };
     userIcon.onclick = () => { userMenu.style.display = ( userMenu.style.display === 'block' ) ? 'none' : 'block'; }
-    const switchAccountBtn = document.getElementById('switch-account');
-    if (switchAccountBtn) {
+    const switchAccountBtn = document.getElementById( 'switch-account' );
+    if ( switchAccountBtn ) {
       switchAccountBtn.onclick = async () => {
         userMenu.style.display = 'none';
         try {
-          await signInWithPopup(auth, provider);
-        } catch (e) {
-          showToast("切替失敗");
+          await signInWithPopup( auth, provider );
+        } catch ( e ) {
+          showToast( "切替失敗" );
         }
       };
     }
@@ -464,16 +461,6 @@
       navigate();
     } );
 
-    /* Firestoreキャッシュ + 右ボタン + Trash + プレビュー対応 */
-    // let unsubscribe=null;
-    // async function loadMemos(){
-    //   if(unsubscribe) unsubscribe(); // 古いlistener解除
-    //   const q=query(collection(db,'users',auth.currentUser.uid,'memos'), orderBy('updated','desc'));
-    //   unsubscribe = onSnapshot(q, snap=>{
-    //     memosCache = snap.docs.map(d=>({id:d.id,...d.data()}));
-    //     renderMemos();
-    //   });
-    // }
     async function loadMetaOnce() {
       if ( metaCache ) return metaCache;
 
@@ -610,38 +597,7 @@
 
           memoList.appendChild( li );
         } );
-    }// function renderMemos(){
-    //   memoList.innerHTML='';
-    //   memosCache.filter(m=>!m.deletedAt).forEach(data=>{
-    //     const li=document.createElement('li');
-    //     const titleSpan=document.createElement('span'); titleSpan.className='memo-title'; titleSpan.textContent=data.title||'Untitled';
-    //     li.appendChild(titleSpan);
-
-    //     const rightDiv=document.createElement('div'); rightDiv.className='memo-right';
-    //     const dateSpan=document.createElement('span'); dateSpan.className='date-span';
-    //     dateSpan.textContent=new Date(data.updated).toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
-    //     const menuBtn=document.createElement('button'); menuBtn.textContent='⋯'; menuBtn.className='menu-btn longpress-btn';
-    //     const menuPopup=document.createElement('div'); menuPopup.className='menu-popup';
-    //     const copyAction=document.createElement('button'); copyAction.textContent='Copy';
-    //     copyAction.onclick=async(e)=>{ e.stopPropagation(); navigator.clipboard.writeText(data.content||''); showToast('Copied'); menuPopup.style.display='none'; }
-    //     const deleteAction=document.createElement('button'); deleteAction.textContent='❌';
-    //     deleteAction.onclick=async(e)=>{ e.stopPropagation(); await setDoc(doc(db,'users',auth.currentUser.uid,'memos',data.id),{deletedAt:Date.now()},{merge:true}); showToast('Moved to Trash'); menuPopup.style.display='none'; }
-    //     menuPopup.append(copyAction,deleteAction);
-    //     menuBtn.onclick=(e)=>{ e.stopPropagation(); menuPopup.style.display=(menuPopup.style.display==='block')?'none':'block'; }
-    //     rightDiv.append(dateSpan,menuBtn,menuPopup);
-    //     li.appendChild(rightDiv);
-
-    //     /* 長押しプレビュー */
-    //     menuBtn.addEventListener('mousedown',()=>{ longPressTimer=setTimeout(()=>{ showPreview(data.id,data.title,data.content); },500); });
-    //     menuBtn.addEventListener('mouseup',()=>{ clearTimeout(longPressTimer); });
-    //     menuBtn.addEventListener('mouseleave',()=>{ clearTimeout(longPressTimer); });
-    //     menuBtn.addEventListener('touchstart',()=>{ longPressTimer=setTimeout(()=>{ showPreview(data.id,data.title,data.content); },500); });
-    //     menuBtn.addEventListener('touchend',()=>{ clearTimeout(longPressTimer); });
-
-    //     li.onclick=()=>location.hash=`#/editor/${data.id}`;
-    //     memoList.appendChild(li);
-    //   });
-    // }
+    }
 
     /* Trash表示 */
     function loadTrash() {
@@ -885,9 +841,7 @@
       }
 
 
-      // 2-6. PDF（1ページ目だけ表示＋リンク）
-      // 画像URL直接（クリックで元URLを開く）
-      // 2-6. PDF（1ページ目表示＋確実に開けるリンク）
+      // 2-6. 画像
 
       const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
       if ( imgRegex.test( url ) ) {
@@ -904,102 +858,100 @@
         insertEl( img );
         return;
       }
-      // 2-7. 画像URL直接（リンク付き）
-      // PDF（1ページ目だけ表示・クリックで原本）
 
-      // 2-7. 通常URL（カード＋生URL表示）
-      const linkRegex = /^https?:\/\/\S+$/;
-      if (linkRegex.test(url)) {
-        const container = document.createElement('div');
-        container.style.margin = '8px 0';
+    //   // 2-7. 通常URL（カード＋生URL表示）
+    //   const linkRegex = /^https?:\/\/\S+$/;
+    //   if ( linkRegex.test( url ) ) {
+    //     const container = document.createElement( 'div' );
+    //     container.style.margin = '8px 0';
 
-        // カード本体
-        const card = document.createElement('div');
-        card.style.border = '1px solid #ddd';
-        card.style.borderRadius = '6px';
-        card.style.padding = '8px';
-        card.style.display = 'flex';
-        card.style.alignItems = 'center';
-        card.style.gap = '8px';
-        card.style.cursor = 'pointer';
-        card.contentEditable = false;
+    //     // カード本体
+    //     const card = document.createElement( 'div' );
+    //     card.style.border = '1px solid #ddd';
+    //     card.style.borderRadius = '6px';
+    //     card.style.padding = '8px';
+    //     card.style.display = 'flex';
+    //     card.style.alignItems = 'center';
+    //     card.style.gap = '8px';
+    //     card.style.cursor = 'pointer';
+    //     card.contentEditable = false;
 
-        const icon = document.createElement('img');
-        icon.src = 'https://www.google.com/s2/favicons?domain=' + url;
-        icon.width = 16;
-        icon.height = 16;
+    //     const icon = document.createElement( 'img' );
+    //     icon.src = 'https://www.google.com/s2/favicons?domain=' + url;
+    //     icon.width = 16;
+    //     icon.height = 16;
 
-        const titleSpan = document.createElement('span');
-        titleSpan.style.fontWeight = 'bold';
-        titleSpan.style.fontSize = '0.9em';
-        titleSpan.style.overflow = 'hidden';
-        titleSpan.style.textOverflow = 'ellipsis';
-        titleSpan.style.whiteSpace = 'nowrap';
+    //     const titleSpan = document.createElement( 'span' );
+    //     titleSpan.style.fontWeight = 'bold';
+    //     titleSpan.style.fontSize = '0.9em';
+    //     titleSpan.style.overflow = 'hidden';
+    //     titleSpan.style.textOverflow = 'ellipsis';
+    //     titleSpan.style.whiteSpace = 'nowrap';
 
-        // タイトル取得（失敗したら必ずホスト名）
-        (async () => {
-          let text = '';
+    //     // タイトル取得（失敗したら必ずホスト名）
+    //     ( async () => {
+    //       let text = '';
 
-          try {
-            const res = await fetch(url, { mode: 'cors' });
-            const html = await res.text();
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const title = doc.querySelector('title')?.innerText?.trim();
-            if (title) text = title;
-          } catch {}
+    //       try {
+    //         const res = await fetch( url, { mode: 'cors' } );
+    //         const html = await res.text();
+    //         const doc = new DOMParser().parseFromString( html, 'text/html' );
+    //         const title = doc.querySelector( 'title' )?.innerText?.trim();
+    //         if ( title ) text = title;
+    //       } catch { }
 
-          // フォールバック：ホスト名
-          if (!text) {
-            try {
-              text = new URL(url).hostname;
-            } catch {}
-          }
+    //       // フォールバック：ホスト名
+    //       if ( !text ) {
+    //         try {
+    //           text = new URL( url ).hostname;
+    //         } catch { }
+    //       }
 
-          if (text) {
-            titleSpan.textContent = text;
-            titleSpan.style.display = '';
-          } else {
-            titleSpan.style.display = 'none';
-          }
-        })();
+    //       if ( text ) {
+    //         titleSpan.textContent = text;
+    //         titleSpan.style.display = '';
+    //       } else {
+    //         titleSpan.style.display = 'none';
+    //       }
+    //     } )();
 
-        card.append(icon, titleSpan);
+    //     card.append( icon, titleSpan );
 
-        card.addEventListener('click', e => {
-          e.preventDefault();
-          e.stopPropagation();
-          window.open(url, '_blank', 'noopener');
-        });
+    //     card.addEventListener( 'click', e => {
+    //       e.preventDefault();
+    //       e.stopPropagation();
+    //       window.open( url, '_blank', 'noopener' );
+    //     } );
 
-        // 生リンク（いじらない）
-        const linkLine = document.createElement('a');
-        linkLine.href = url;
-        linkLine.textContent = url;
-        linkLine.target = '_blank';
-        linkLine.rel = 'noopener';
-        linkLine.style.display = 'block';
-        linkLine.style.marginTop = '4px';
+    //     // 生リンク（いじらない）
+    //     const linkLine = document.createElement( 'a' );
+    //     linkLine.href = url;
+    //     linkLine.textContent = url;
+    //     linkLine.target = '_blank';
+    //     linkLine.rel = 'noopener';
+    //     linkLine.style.display = 'block';
+    //     linkLine.style.marginTop = '4px';
 
-        container.append(card, linkLine);
-        insertEl(container);
-        return;
-      }
-      // 2-8. 通常テキスト
+    //     container.append( card, linkLine );
+    //     insertEl( container );
+    //     return;
+    //   }
+    //   // 2-8. 通常テキスト
       insertEl( document.createTextNode( url ) );
     } );
 
-    // contenteditable 内のリンクを再表示後も確実に開けるようにする
-    editor.addEventListener('click', e => {
-      const a = e.target.closest('a');
-      if (!a) return;
+    // // contenteditable 内のリンクを再表示後も確実に開けるようにする
+    // editor.addEventListener( 'click', e => {
+    //   const a = e.target.closest( 'a' );
+    //   if ( !a ) return;
 
-      const href = a.getAttribute('href');
-      if (!href) return;
+    //   const href = a.getAttribute( 'href' );
+    //   if ( !href ) return;
 
-      e.preventDefault();
-      e.stopPropagation();
-      window.open(href, '_blank', 'noopener');
-    });
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   window.open( href, '_blank', 'noopener' );
+    // } );
 
     /* Preview */
     function showPreview( id, title, content ) {
@@ -1015,13 +967,6 @@
       closePreview.onclick = () => preview.style.display = 'none';
     }
 
-
-    /* Navigation buttons */
-    // document.getElementById('new-memo').onclick=async()=>{
-    //   const ref = await addDoc(collection(db,'users',auth.currentUser.uid,'memos'), {title:'',content:'',updated:Date.now(),deletedAt:null});
-    // //   memosCache.push({id:ref.id,title:'',content:'',updated:Date.now(),deletedAt:null});
-    //   location.hash=`#/editor/${ref.id}`;
-    // }
     document.getElementById( 'go-trash' ).onclick = () => { location.hash = '#/trash'; }
     document.getElementById( 'back-list' ).onclick = () => { location.hash = '#/list'; }
     document.getElementById( 'back' ).onclick = () => { if ( history.length > 1 ) history.back(); else location.hash = '#/list'; }
