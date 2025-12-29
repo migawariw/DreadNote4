@@ -558,8 +558,7 @@ editor.addEventListener('paste', async e => {
 
   // 2-2. ニコニコ動画
   let nico = url.match(/nicovideo\.jp\/watch\/([\w]+)/);
-  if (nico) {
-	width =100%;
+  if (nico){
     const wrap = document.createElement('iframe');
     wrap.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
     wrap.frameBorder = "0";
