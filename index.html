@@ -141,6 +141,28 @@
       border: 0;
     }
 
+    .video.youtube {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      /* 通常動画は横長 */
+      margin: 12px auto;
+    }
+
+    .video.youtube.shorts {
+      aspect-ratio: 9 / 16;
+      /* Shorts の縦長 */
+    }
+
+    .video.youtube iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+
     .memo-right {
       display: flex;
       align-items: center;
@@ -881,13 +903,24 @@
       const insertEl = ( el ) => { range.insertNode( el ); range.collapse( false ); saveMemo(); };
 
       // 2-1. YouTube
-      let yt = url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/ );
+      // 2-1. YouTube + Shorts
+      let yt = url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]+)/ );
       if ( yt ) {
+        const videoId = yt[1];
+
         const wrap = document.createElement( 'div' );
-        wrap.className = 'video';
+        wrap.className = 'video youtube'; // 従来通りの YouTube用クラス
+
+        // ★ Shorts判定：URLに /shorts/ が含まれていたら縦長クラス追加
+        if ( /youtube\.com\/shorts\//.test( url ) ) {
+          wrap.classList.add( 'shorts' ); // CSSで aspect-ratio:9/16 が適用される
+        }
+
         const iframe = document.createElement( 'iframe' );
-        iframe.src = `https://www.youtube-nocookie.com/embed/${yt[1]}?modestbranding=1&rel=0&playsinline=1`;
+        iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?modestbranding=1&rel=0&playsinline=1`;
+        iframe.allow = "autoplay; fullscreen";
         iframe.allowFullscreen = true;
+
         wrap.appendChild( iframe );
         insertEl( wrap );
         return;
