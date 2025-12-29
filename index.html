@@ -777,34 +777,41 @@
       }
 
 
-      // 2-6. PDF（1ページ目だけ表示＋リンク）
-      // 画像URL直接（クリックで元URLを開く）
-      // 2-6. PDF（1ページ目表示＋確実に開けるリンク）
+      // 2-6. PDF（1ページ目を画像として表示）
       const pdfRegex = /https?:\/\/\S+\.pdf/i;
       if ( pdfRegex.test( url ) ) {
-        const wrap = document.createElement( 'div' );
 
-        const iframe = document.createElement( 'iframe' );
-        iframe.src = url + '#page=1&view=FitH';
-        iframe.style.width = '100%';
-        iframe.style.height = '600px';
-        iframe.style.border = '1px solid #ccc';
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        const link = document.createElement( 'div' );
-        link.textContent = '▶ PDFを開く';
-        link.style.cursor = 'pointer';
-        link.style.color = '#06c';
-        link.style.margin = '4px 0';
+        const pdf = await pdfjsLib.getDocument( url ).promise;
+        const page = await pdf.getPage( 1 );
 
-        link.addEventListener( 'click', e => {
+        const scale = 1.5;
+        const viewport = page.getViewport( { scale } );
+
+        const canvas = document.createElement( 'canvas' );
+        const ctx = canvas.getContext( '2d' );
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render( {
+          canvasContext: ctx,
+          viewport
+        } ).promise;
+
+        canvas.style.maxWidth = '100%';
+        canvas.style.display = 'block';
+        canvas.style.margin = '8px 0';
+        canvas.style.cursor = 'pointer';
+
+        canvas.addEventListener( 'click', e => {
           e.preventDefault();
           e.stopPropagation();
           window.open( url, '_blank', 'noopener' );
         } );
 
-        wrap.appendChild( iframe );
-        wrap.appendChild( link );
-        insertEl( wrap );
+        insertEl( canvas );
         return;
       }
       const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
