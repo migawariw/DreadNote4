@@ -817,17 +817,55 @@
       // 2-7. 画像URL直接（リンク付き）
       // PDF（1ページ目だけ表示・クリックで原本）
 
-      // 2-7. 通常URL（テキストリンク化）
+      // 2-7. 通常URL（カード＋生URL表示）
       const linkRegex = /^https?:\/\/\S+$/;
-      if ( linkRegex.test( url ) ) {
-        const a = document.createElement( 'a' );
-        a.href = url;
-        a.textContent = url;
-        a.target = '_blank';
-        a.rel = 'noopener';
+      if (linkRegex.test(url)) {
+        const container = document.createElement('div');
+        container.style.margin = '8px 0';
 
-        // 見た目はCSSに任せる
-        insertEl( a );
+        // カード本体
+        const card = document.createElement('div');
+        card.style.border = '1px solid #ddd';
+        card.style.borderRadius = '6px';
+        card.style.padding = '8px';
+        card.style.display = 'flex';
+        card.style.alignItems = 'center';
+        card.style.gap = '8px';
+        card.style.cursor = 'pointer';
+        card.contentEditable = false;
+
+        const icon = document.createElement('img');
+        icon.src = 'https://www.google.com/s2/favicons?domain=' + url;
+        icon.width = 16;
+        icon.height = 16;
+
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = url;
+        titleSpan.style.fontWeight = 'bold';
+        titleSpan.style.fontSize = '0.9em';
+        titleSpan.style.overflow = 'hidden';
+        titleSpan.style.textOverflow = 'ellipsis';
+        titleSpan.style.whiteSpace = 'nowrap';
+
+        card.append(icon, titleSpan);
+
+        card.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open(url, '_blank', 'noopener');
+        });
+
+        // 生リンク（いじらない）
+        const linkLine = document.createElement('a');
+        linkLine.href = url;
+        linkLine.textContent = url;
+        linkLine.target = '_blank';
+        linkLine.rel = 'noopener';
+        linkLine.style.display = 'block';
+        linkLine.style.marginTop = '4px';
+
+        container.append(card, linkLine);
+        insertEl(container);
         return;
       }
       // 2-8. 通常テキスト
