@@ -76,7 +76,6 @@
 
     #editor {
       min-height: 70vh;
-      /* min-height: 200vh; */
       outline: none;
       white-space: pre-wrap;
       word-break: break-word;
@@ -105,7 +104,7 @@
 
     img {
       width: 100%;
-      height: 100%;
+      height: auto;
       display: block;
       margin: 8px 0;
     }
@@ -113,11 +112,28 @@
     .video {
       position: relative;
       width: 100%;
-      /* padding-top: 56.25%; */
+      padding-top: 56.25%;
       margin: 12px auto;
     }
 
     .video iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* TikTok動画専用 */
+    .video.tiktok {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      /* 縦長動画 */
+      margin: 12px auto;
+    }
+
+    .video.tiktok iframe {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -879,40 +895,56 @@
 
       // 2-2. ニコニコ動画
       // ニコニコ動画
-// ニコニコ動画
-let nico = url.match( /nicovideo\.jp\/watch\/([\w]+)/ );
-if ( nico ) {
-  const wrap = document.createElement('div');
-  wrap.className = 'video'; // YouTubeと同じクラス
+      // ニコニコ動画
+      let nico = url.match( /nicovideo\.jp\/watch\/([\w]+)/ );
+      if ( nico ) {
+        const wrap = document.createElement( 'div' );
+        wrap.className = 'video'; // YouTubeと同じクラス
 
-  const iframe = document.createElement('iframe');
-  iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
-  iframe.setAttribute('frameborder', '0');
-  iframe.setAttribute('allowfullscreen', ''); // ここが重要
-  iframe.setAttribute('allow', 'fullscreen');
-  wrap.appendChild(iframe);
+        const iframe = document.createElement( 'iframe' );
+        iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
+        iframe.setAttribute( 'frameborder', '0' );
+        iframe.setAttribute( 'allowfullscreen', '' ); // ここが重要
+        iframe.setAttribute( 'allow', 'fullscreen' );
+        wrap.appendChild( iframe );
 
-  insertEl(wrap);
-  return;
-}
-// 2-3. TikTok
-const tiktok = url.match(/https:\/\/(www\.)?tiktok\.com\/.*\/video\/(\d+)/);
-if (tiktok) {
-  const videoId = tiktok[2];
-  const wrap = document.createElement('div');
-  wrap.className = 'video';
+        insertEl( wrap );
+        return;
+      }
+      // 2-3. TikTok
+      // const tiktok = url.match( /https:\/\/(www\.)?tiktok\.com\/.*\/video\/(\d+)/ );
+      // if ( tiktok ) {
+      //   const videoId = tiktok[2];
+      //   const wrap = document.createElement( 'div' );
+      //   wrap.className = 'video';
 
-  const iframe = document.createElement('iframe');
-  iframe.src = `https://www.tiktok.com/embed/${videoId}`;
-  iframe.allow = "autoplay; fullscreen";
-  iframe.allowFullscreen = true;
+      //   const iframe = document.createElement( 'iframe' );
+      //   iframe.src = `https://www.tiktok.com/embed/${videoId}`;
+      //   iframe.allow = "autoplay; fullscreen";
+      //   iframe.allowFullscreen = true;
 
-  wrap.appendChild(iframe);
-  range.insertNode(wrap);
-  range.collapse(false);
-  saveMemo();
-  return;
-}
+      //   wrap.appendChild( iframe );
+      //   range.insertNode( wrap );
+      //   range.collapse( false );
+      //   saveMemo();
+      //   return;
+      // }
+      let tt = url.match( /tiktok\.com\/.*\/video\/(\d+)/ );
+      if ( tt ) {
+        const videoId = tt[1];
+
+        const wrap = document.createElement( 'div' );
+        wrap.className = 'video tiktok'; // ここがポイント
+
+        const iframe = document.createElement( 'iframe' );
+        iframe.src = `https://www.tiktok.com/embed/${videoId}`;
+        iframe.allow = "autoplay; fullscreen";
+        iframe.allowFullscreen = true;
+
+        wrap.appendChild( iframe );
+        insertEl( wrap );
+        return;
+      }
 
       // 2-6. 画像
 
