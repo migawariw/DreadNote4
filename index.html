@@ -590,60 +590,19 @@ editor.addEventListener('paste', async e => {
 
 
   // 2-7. 画像URL直接
-  // 画像URL
-const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
-// PDF URL
+  // 2-7a. PDF URL
 const pdfRegex = /https?:\/\/\S+\.pdf/i;
-
-// 画像の場合（既存）
-if (imgRegex.test(url)) {
-  const img = document.createElement('img');
-  img.src = url;
-  insertEl(img);
-  return;
-}
-
-// PDFの場合（追加）
 if (pdfRegex.test(url)) {
-  renderPdfPages(url);
+  await insertPdfPages(url);
   return;
 }
-
-// ----------------------------
-// PDFを全ページ描画する関数
-// ----------------------------
-async function renderPdfPages(pdfUrl) {
-  // PDF.js の worker 設定（必須）
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-  const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
-
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-
-    const scale = 1.5; // 表示倍率（好みで調整）
-    const viewport = page.getViewport({ scale });
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    await page.render({
-      canvasContext: ctx,
-      viewport
-    }).promise;
-
-    // canvas を挿入
-    insertEl(canvas);
-
-    // ページ間に1行あける
-    const spacer = document.createElement('div');
-    spacer.style.height = '1em';
-    insertEl(spacer);
+  const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
+  if (imgRegex.test(url)) {
+    const img = document.createElement('img');
+    img.src = url;
+    insertEl(img);
+    return;
   }
-}
 
   // 2-8. 通常テキスト
   insertEl(document.createTextNode(url));
@@ -663,6 +622,41 @@ function showPreview(id,title,content){
   closePreview.onclick=()=>preview.style.display='none';
 }
 
+async function insertPdfPages(pdfUrl) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+
+    const scale = 1.4;
+    const viewport = page.getViewport({ scale });
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    await page.render({
+      canvasContext: ctx,
+      viewport
+    }).promise;
+
+    // canvas 挿入
+    const range = document.getSelection().getRangeAt(0);
+    range.insertNode(canvas);
+    range.collapse(false);
+
+    // 1行あける
+    const br = document.createElement('br');
+    range.insertNode(br);
+    range.collapse(false);
+  }
+
+  saveMemo();
+}
 /* Navigation buttons */
 // document.getElementById('new-memo').onclick=async()=>{
 //   const ref = await addDoc(collection(db,'users',auth.currentUser.uid,'memos'), {title:'',content:'',updated:Date.now(),deletedAt:null});
