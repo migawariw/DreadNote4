@@ -7,7 +7,7 @@
   <link rel="icon" href="/DreadNote/favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="DreadNote/favicon2.png" sizes="180x180">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
+  <style>
     body {
       margin: 0;
       padding: 16px;
@@ -242,31 +242,6 @@
       user-select: none;
       cursor: pointer;
     }
-
-    body.dark {
-      background: #000;
-      color: #f2f2f7;
-    }
-
-    body.dark #editor {
-      color: #f2f2f7;
-      border-top-color: #333;
-    }
-
-    body.dark #editor a {
-      color: #f2f2f7;
-    }
-
-    body.dark li {
-      border-bottom-color: #333;
-    }
-
-    body.dark .menu-popup,
-    body.dark #user-menu {
-      background: #1c1c1e;
-      color: #f2f2f7;
-      border-color: #333;
-    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -291,7 +266,6 @@
         <img id="user-icon" src="" title="User Menu">
         <div id="user-menu">
           <button id="switch-account">アカウント切替</button>
-          <button id="toggle-dark">ダークモード</button>
           <button id="logout-btn">LogOut</button>
         </div>
       </div>
@@ -872,19 +846,29 @@
         titleSpan.style.textOverflow = 'ellipsis';
         titleSpan.style.whiteSpace = 'nowrap';
 
-        // タイトル取得（失敗したら非表示）
+        // タイトル取得（失敗したら必ずホスト名）
         (async () => {
+          let text = '';
+
           try {
             const res = await fetch(url, { mode: 'cors' });
             const html = await res.text();
             const doc = new DOMParser().parseFromString(html, 'text/html');
             const title = doc.querySelector('title')?.innerText?.trim();
-            if (title) {
-              titleSpan.textContent = title;
-            } else {
-              titleSpan.style.display = 'none';
-            }
-          } catch {
+            if (title) text = title;
+          } catch {}
+
+          // フォールバック：ホスト名
+          if (!text) {
+            try {
+              text = new URL(url).hostname;
+            } catch {}
+          }
+
+          if (text) {
+            titleSpan.textContent = text;
+            titleSpan.style.display = '';
+          } else {
             titleSpan.style.display = 'none';
           }
         })();
@@ -897,29 +881,19 @@
           window.open(url, '_blank', 'noopener');
         });
 
-        // 生URL（プレーンテキスト）
-        const linkLine = document.createElement('div');
+        // 生リンク（いじらない）
+        const linkLine = document.createElement('a');
+        linkLine.href = url;
         linkLine.textContent = url;
+        linkLine.target = '_blank';
+        linkLine.rel = 'noopener';
         linkLine.style.display = 'block';
         linkLine.style.marginTop = '4px';
-        linkLine.style.color = '#1c1c1e';
-        linkLine.style.wordBreak = 'break-all';
 
         container.append(card, linkLine);
         insertEl(container);
         return;
       }
-    // ダークモード切替ボタン
-    const darkBtn = document.getElementById('toggle-dark');
-
-    darkBtn.onclick = () => {
-      document.body.classList.toggle('dark');
-      localStorage.setItem(
-        'dreadnote-dark',
-        document.body.classList.contains('dark') ? '1' : '0'
-      );
-    };
-
       // 2-8. 通常テキスト
       insertEl( document.createTextNode( url ) );
     } );
@@ -1001,10 +975,6 @@
     }
 
     /* 初期化 */
-    // ダークモード初期化
-    if (localStorage.getItem('dreadnote-dark') === '1') {
-      document.body.classList.add('dark');
-    }
     // navigate();
   </script>
 </body>
