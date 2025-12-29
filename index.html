@@ -95,6 +95,16 @@
       /* iOS標準テキスト色 */
     }
 
+    #editor a {
+      color: #1c1c1e;
+      text-decoration: none;
+    }
+
+    #editor a:hover,
+    #editor a:focus,
+    #editor a:active {
+      text-decoration: none;
+    }
 
 
     img {
@@ -186,7 +196,7 @@
       display: none;
       z-index: 100;
       white-space: nowrap;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       overflow: hidden;
     }
 
@@ -293,19 +303,22 @@
       color: #f2f2f7;
     }
 
-    /* editor内リンクは見た目のみ（飛ばない） */
+    body.dark #editor a {
+      color: #f2f2f7;
+    }
+
+    /* Link color & tap disable for plain links in editor */
     #editor a {
-      color: #007aff;
-      text-decoration: none;
+      color: #007aff; /* iOS blue */
+      pointer-events: none; /* text link is not tappable */
     }
 
     body.dark #editor a {
       color: #4da3ff;
     }
-
-    /* Dark mode + button */
+  </style>
     body.dark #new-memo {
-      background: #30d158;
+      background: #30d158; /* iOS系グリーン */
       color: #000;
       border-radius: 50%;
     }
@@ -313,13 +326,6 @@
     body.dark #new-memo:hover {
       filter: brightness(0.9);
     }
-
-    /* Link card */
-    [data-link-card] {
-      cursor: pointer;
-    }
-  </style>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 
@@ -397,65 +403,65 @@
     const editor = document.getElementById( 'editor' );
 
     // Markdown-style heading support (#, ##, ###)
-    editor.addEventListener( 'keydown', e => {
-      if ( e.key !== 'Enter' ) return;
+    editor.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
 
       const sel = window.getSelection();
-      if ( !sel.rangeCount ) return;
+      if (!sel.rangeCount) return;
 
-      const range = sel.getRangeAt( 0 );
+      const range = sel.getRangeAt(0);
       const line = range.startContainer.textContent || '';
 
-      if ( /^#\s/.test( line ) ) {
-        document.execCommand( 'formatBlock', false, 'p' );
+      if (/^#\s/.test(line)) {
+        document.execCommand('formatBlock', false, 'p');
       }
-    } );
+    });
 
-    editor.addEventListener( 'input', e => {
+    editor.addEventListener('input', e => {
       const sel = window.getSelection();
-      if ( !sel.rangeCount ) return;
+      if (!sel.rangeCount) return;
 
-      const range = sel.getRangeAt( 0 );
+      const range = sel.getRangeAt(0);
       const node = range.startContainer;
 
-      if ( node.nodeType !== Node.TEXT_NODE ) return;
+      if (node.nodeType !== Node.TEXT_NODE) return;
 
       const text = node.textContent;
-      const match = text.match( /^(#{1,3})\s(.+)/ );
-      if ( !match ) return;
+      const match = text.match(/^(#{1,3})\s(.+)/);
+      if (!match) return;
 
       const level = match[1].length;
       const content = match[2];
 
-      const h = document.createElement( 'div' );
+      const h = document.createElement('div');
       h.textContent = content;
       h.style.fontSize = level === 1 ? '1.6em' : level === 2 ? '1.3em' : '1.1em';
       h.style.fontWeight = 'bold';
       h.style.margin = '8px 0';
 
-      node.parentNode.replaceWith( h );
-    } );
+      node.parentNode.replaceWith(h);
+    });
     const titleInput = document.getElementById( 'title' );
     const userIcon = document.getElementById( 'user-icon' );
     const userMenu = document.getElementById( 'user-menu' );
 
     // Dark mode toggle
-    const darkBtn = document.getElementById( 'dark-btn' );
+    const darkBtn = document.getElementById('dark-btn');
 
-    if ( darkBtn ) {
-      darkBtn.onclick = ( e ) => {
+    if (darkBtn) {
+      darkBtn.onclick = (e) => {
         e.stopPropagation();
-        document.body.classList.toggle( 'dark' );
+        document.body.classList.toggle('dark');
         localStorage.setItem(
           'dreadnote-dark',
-          document.body.classList.contains( 'dark' ) ? '1' : '0'
+          document.body.classList.contains('dark') ? '1' : '0'
         );
       };
     }
 
     // 初期化（保存状態を反映）
-    if ( localStorage.getItem( 'dreadnote-dark' ) === '1' ) {
-      document.body.classList.add( 'dark' );
+    if (localStorage.getItem('dreadnote-dark') === '1') {
+      document.body.classList.add('dark');
     }
     const toast = document.getElementById( 'toast' );
     const preview = document.getElementById( 'preview' );
@@ -478,14 +484,14 @@
     document.getElementById( 'signup' ).onclick = async () => { try { await createUserWithEmailAndPassword( auth, emailInput.value, passwordInput.value ); } catch ( e ) { showToast( "サインアップ失敗: " + e.message ); } };
     document.getElementById( 'google-login' ).onclick = async () => { try { await signInWithPopup( auth, provider ); } catch ( e ) { showToast( "Googleログイン失敗: " + e.message ); } };
     userIcon.onclick = () => { userMenu.style.display = ( userMenu.style.display === 'block' ) ? 'none' : 'block'; }
-    const switchAccountBtn = document.getElementById( 'switch-account' );
-    if ( switchAccountBtn ) {
+    const switchAccountBtn = document.getElementById('switch-account');
+    if (switchAccountBtn) {
       switchAccountBtn.onclick = async () => {
         userMenu.style.display = 'none';
         try {
-          await signInWithPopup( auth, provider );
-        } catch ( e ) {
-          showToast( "切替失敗" );
+          await signInWithPopup(auth, provider);
+        } catch (e) {
+          showToast("切替失敗");
         }
       };
     }
@@ -965,12 +971,12 @@
 
       // 2-7. 通常URL（カード＋生URL表示）
       const linkRegex = /^https?:\/\/\S+$/;
-      if ( linkRegex.test( url ) ) {
-        const container = document.createElement( 'div' );
+      if (linkRegex.test(url)) {
+        const container = document.createElement('div');
         container.style.margin = '8px 0';
 
         // カード本体
-        const card = document.createElement( 'div' );
+        const card = document.createElement('div');
         card.dataset.linkCard = '1';
         card.dataset.href = url;
         card.style.border = '1px solid #ddd';
@@ -982,12 +988,12 @@
         card.style.cursor = 'pointer';
         card.contentEditable = false;
 
-        const icon = document.createElement( 'img' );
+        const icon = document.createElement('img');
         icon.src = 'https://www.google.com/s2/favicons?domain=' + url;
         icon.width = 16;
         icon.height = 16;
 
-        const titleSpan = document.createElement( 'span' );
+        const titleSpan = document.createElement('span');
         titleSpan.style.fontWeight = 'bold';
         titleSpan.style.fontSize = '0.9em';
         titleSpan.style.overflow = 'hidden';
@@ -995,68 +1001,70 @@
         titleSpan.style.whiteSpace = 'nowrap';
 
         // タイトル取得（失敗したら必ずホスト名）
-        ( async () => {
+        (async () => {
           let text = '';
 
           try {
-            const res = await fetch( url, { mode: 'cors' } );
+            const res = await fetch(url, { mode: 'cors' });
             const html = await res.text();
-            const doc = new DOMParser().parseFromString( html, 'text/html' );
-            const title = doc.querySelector( 'title' )?.innerText?.trim();
-            if ( title ) text = title;
-          } catch { }
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const title = doc.querySelector('title')?.innerText?.trim();
+            if (title) text = title;
+          } catch {}
 
           // フォールバック：ホスト名
-          if ( !text ) {
+          if (!text) {
             try {
-              text = new URL( url ).hostname;
-            } catch { }
+              text = new URL(url).hostname;
+            } catch {}
           }
 
-          if ( text ) {
+          if (text) {
             titleSpan.textContent = text;
             titleSpan.style.display = '';
           } else {
             titleSpan.style.display = 'none';
           }
-        } )();
+        })();
 
-        card.append( icon, titleSpan );
+        card.append(icon, titleSpan);
 
-        card.addEventListener( 'click', e => {
+        card.addEventListener('click', e => {
           e.preventDefault();
           e.stopPropagation();
-          window.open( url, '_blank', 'noopener' );
-        } );
+          window.open(url, '_blank', 'noopener');
+        });
 
-      // 生リンク（絶対に飛ばないテキストで表示）
-      const linkLine = document.createElement( 'span' );
-      linkLine.textContent = url;
-      linkLine.style.display = 'block';
-      linkLine.style.marginTop = '4px';
-      linkLine.style.color = 'inherit';
-      linkLine.contentEditable = false;
+        // 生リンク（いじらない）
+        const linkLine = document.createElement('a');
+        linkLine.href = url;
+        linkLine.textContent = url;
+        linkLine.target = '_blank';
+        linkLine.rel = 'noopener';
+        linkLine.style.display = 'block';
+        linkLine.style.marginTop = '4px';
+        linkLine.contentEditable = false;
 
-      container.append( card, linkLine );
-      insertEl( container );
-      return;
+        container.append(card, linkLine);
+        insertEl(container);
+        return;
       }
       // 2-8. 通常テキスト
       insertEl( document.createTextNode( url ) );
     } );
 
     // contenteditable 内のリンクを再表示後も確実に開けるようにする
-    editor.addEventListener( 'click', e => {
-      const card = e.target.closest( '[data-link-card]' );
-      if ( !card ) return;
+    editor.addEventListener('click', e => {
+      const card = e.target.closest('[data-link-card]');
+      if (!card) return;
 
       const href = card.dataset.href;
-      if ( !href ) return;
+      if (!href) return;
 
       e.preventDefault();
       e.stopPropagation();
-      window.open( href, '_blank', 'noopener' );
-    } );
+      window.open(href, '_blank', 'noopener');
+    });
 
     /* Preview */
     function showPreview( id, title, content ) {
