@@ -112,7 +112,7 @@
     .video {
       position: relative;
       width: 100%;
-      padding-top: 56.25%;
+      /* padding-top: 56.25%; */
       margin: 12px auto;
     }
 
@@ -124,12 +124,14 @@
       border: 0;
     }
 
-    /* TikTok動画専用 */
+    /* TikTok専用 */
     .video.tiktok {
       position: relative;
       width: 100%;
       aspect-ratio: 9 / 16;
-      /* 縦長動画 */
+      /* 縦長比率 */
+      max-height: 90vh;
+      /* 画面高さの90%まで */
       margin: 12px auto;
     }
 
@@ -141,17 +143,31 @@
       border: 0;
     }
 
+    /* YouTube Shorts専用 */
+    .video.youtube.shorts {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      /* 縦長比率 */
+      max-height: 90vh;
+      /* 画面高さの90%まで */
+      margin: 12px auto;
+    }
+
+    .video.youtube.shorts iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* YouTube通常動画（横長）はそのまま） */
     .video.youtube {
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      /* 通常動画は横長 */
       margin: 12px auto;
-    }
-
-    .video.youtube.shorts {
-      aspect-ratio: 9 / 16;
-      /* Shorts の縦長 */
     }
 
     .video.youtube iframe {
