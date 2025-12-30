@@ -959,7 +959,7 @@
 			let yt = url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/ );
 			if ( yt ) {
 				const wrap = document.createElement( 'div' );
-				wrap.className = 'video youtube'; // 16:9固定でOK
+				wrap.className = 'video'; // 16:9固定でOK
 
 				const iframe = document.createElement( 'iframe' );
 				iframe.src = `https://www.youtube-nocookie.com/embed/${yt[1]}?modestbranding=1&rel=0&playsinline=1`;
