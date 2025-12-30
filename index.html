@@ -2,1128 +2,1083 @@
 <html lang="ja">
 
 <head>
-	<meta charset="UTF-8">
-	<title>DreadNote</title>
-	<link rel="icon" href="/DreadNote/favicon.ico" type="image/x-icon">
-	<link rel="apple-touch-icon" href="DreadNote/favicon2.png" sizes="180x180">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<style>
-		body {
-			margin: 0;
-			padding: 17px;
-			font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-			font-size: 17px;
-			background: #ffffff;
-			color: #1c1c1e;
-		}
-
-		section {
-			max-width: 800px;
-			margin: auto;
-			position: relative;
-		}
-
-		[hidden] {
-			display: none;
-		}
-
-		input,
-		button {
-			font-size: 17px;
-			margin: 4px 0;
-		}
-
-		ul {
-			padding-left: 0;
-			margin: 0;
-		}
-
-		li {
-			list-style: none;
-			padding: 8px;
-			border-bottom: 1px solid #ddd;
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			position: relative;
-			user-select: none;
-			cursor: default;
-		}
-
-		li:hover {
-			background: #f2f2f7;
-		}
-
-		li .memo-title {
-			flex: 1;
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			margin-right: 8px;
-		}
-
-		.menu-btn,
-		.longpress-btn {
-			user-select: none;
-		}
-
-		#title {
-			border: none;
-			background: transparent;
-			color: inherit;
-			font-size: 21px;
-		}
-
-		#editor {
-			min-height: 70vh;
-			outline: none;
-			white-space: pre-wrap;
-			word-break: break-word;
-			border-top: 1px solid #ccc;
-			padding-top: 17px;
-
-			/* iPhoneメモ風 16pxから変更*/
-			font-size: 17px;
-			line-height: 1.75;
-			letter-spacing: 0.025em;
-			color: #1c1c1e;
-			/* iOS標準テキスト色 */
-		}
-
-		#editor a {
-			color: #1c1c1e;
-			text-decoration: none;
-		}
-
-		#editor a:hover,
-		#editor a:focus,
-		#editor a:active {
-			text-decoration: none;
-		}
-
-
-		img {
-			width: 100%;
-			height: auto;
-			display: block;
-			margin: 8px 0;
-		}
-
-		.video {
-			position: relative;
-			width: 100%;
-			/* padding-top: 56.25%; */
-			/* 16:9 */
-			margin: 0;
-		}
-
-		.video iframe {
-			position: absolute;
-			inset: 0;
-			width: 100%;
-			height: 100%;
-			border: 0;
-			background: black;
-			/* 端が黒くなる */
-		}
-
-		/* TikTok専用 */
-
-		/* TikTok 縦長 */
-		/* YouTube 用（16:9） */
-		.video.youtube {
-			position: relative;
-			width: 100%;
-			padding-top: 56.25%;
-			/* 16:9 */
-			margin: 12px 0;
-		}
-
-		.video.youtube iframe {
-			position: absolute;
-			inset: 0;
-			width: 100%;
-			height: 100%;
-			border: 0;
-		}
-
-		/* TikTok 用（縦長） */
-		.video.tiktok {
-			width: 100%;
-			aspect-ratio: 9/16;
-			max-height: 100vh;
-			margin: 12px auto;
-			margin: 0;
-			/* 余白ゼロ */
-			padding: 0;
-			/* 余白ゼロ */
-			overflow: hidden;
-		}
-
-		.video.tiktok iframe {
-			width: 100%;
-			height: 100%;
-			border: 0;
-			display: block;
-			position: absolute;
-		}
-
-		/* Twitter 用（高さ自動、余白なし） */
-		.video.twitter {
-			width: 100%;
-			padding-top: 0;
-			margin: 12px 0;
-		}
-
-		.video.twitter blockquote {
-			margin: 0;
-		}
-
-
-
-
-
-
-		.instagram-embed-wrapper {
-			min-height: 400px;
-			width: 100%;
-		}
-
-
-		.memo-right {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-		}
-
-		.date-span {
-			font-size: 0.7em;
-			color: #666;
-			flex-shrink: 0;
-		}
-
-		.menu-btn {
-			background: none;
-			border: none;
-			font-size: 16px;
-			cursor: pointer;
-		}
-
-		.menu-popup {
-			position: absolute;
-			top: 100%;
-			right: 0;
-			background: #fff;
-			border: 1px solid #ccc;
-			padding: 4px 0;
-			box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-			display: none;
-			z-index: 10;
-		}
-
-		.menu-popup button {
-			width: 100%;
-			text-align: left;
-			padding: 4px 12px;
-			background: none;
-			border: none;
-			cursor: pointer;
-		}
-
-		.menu-popup button:hover {
-			background: #eee;
-		}
-
-		#user-icon {
-			width: 32px;
-			height: 32px;
-			border-radius: 50%;
-			cursor: pointer;
-			position: relative;
-		}
-
-		#user-menu {
-			position: absolute;
-			top: 60px;
-			right: 0;
-			background: #ffffff;
-			border: 1px solid #ddd;
-			border-radius: 8px;
-			display: none;
-			z-index: 100;
-			white-space: nowrap;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-			overflow: hidden;
-		}
-
-		#user-menu button {
-			display: block;
-			width: 100%;
-			padding: 10px 16px;
-			background: none;
-			border: none;
-			text-align: left;
-			font-size: 15px;
-		}
-
-		#user-menu button:hover {
-			background: #f2f2f7;
-		}
-
-		#toast {
-			display: none;
-			position: fixed;
-			bottom: 16px;
-			left: 50%;
-			transform: translateX(-50%);
-			background: rgba(0, 0, 0, 0.8);
-			color: #fff;
-			padding: 12px 24px;
-			border-radius: 8px;
-			opacity: 0;
-			pointer-events: none;
-			transition: opacity 0.3s ease;
-			z-index: 1000;
-		}
-
-		#toast.show {
-			display: block;
-			opacity: 1;
-			pointer-events: auto;
-		}
-
-		.preview-popup {
-			display: none;
-			position: fixed;
-			background: #fff;
-			border: 1px solid #333;
-			padding: 8px;
-			z-index: 1000;
-			max-width: 80%;
-			box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-		}
-
-		button {
-			cursor: pointer;
-		}
-
-		.flex-between {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-		}
-
-		.longpress-btn {
-			background: #eee;
-			border: 1px solid #ccc;
-			padding: 4px 8px;
-			border-radius: 4px;
-			user-select: none;
-			cursor: pointer;
-		}
-
-		/* Disable underline on all links (including hover, focus, active, visited) */
-		a,
-		a:hover,
-		a:focus,
-		a:active,
-		a:visited {
-			text-decoration: none !important;
-		}
-
-		/* Dark mode styles */
-		body.dark {
-			background: #000;
-			color: #f2f2f7;
-		}
-
-		body.dark #editor {
-			color: #f2f2f7;
-			border-top-color: #333;
-		}
-
-		body.dark li {
-			border-bottom-color: #333;
-		}
-
-		body.dark li:hover {
-			background: #1c1c1e;
-		}
-
-		body.dark #user-menu {
-			background: #1c1c1e;
-			border-color: #333;
-		}
-
-		body.dark #user-menu button {
-			color: #f2f2f7;
-		}
-
-		body.dark #editor a {
-			color: #f2f2f7;
-		}
-
-
-		/* ボタンの基本サイズ */
-		.menu-btn,
-		.longpress-btn {
-			font-size: 18px;
-			padding: 6px 12px;
-			border-radius: 6px;
-		}
-
-		/* ボタン内アイコンのサイズ */
-		.menu-btn img,
-		.longpress-btn img,
-		#user-icon {
-			width: 40px;
-			height: 40px;
-		}
-
-		/* ドロップダウンメニューのサイズ */
-		.menu-popup {
-			padding: 6px 0;
-			border-radius: 6px;
-		}
-
-		.menu-popup button {
-			font-size: 17px;
-			padding: 8px 16px;
-			border-radius: 6px;
-		}
-
-		/* ダークモード対応 */
-		body.dark .menu-btn,
-		body.dark .longpress-btn {
-			background: #1c1c1e;
-			color: #f2f2f7;
-			border-color: #333;
-		}
-
-		body.dark .menu-popup {
-			background: #1c1c1e;
-			border-color: #333;
-		}
-
-		body.dark .menu-popup button {
-			color: #f2f2f7;
-		}
-
-		body.dark .menu-popup button:hover {
-			background: #333;
-		}
-	</style>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-	<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-	<script async src="https://www.instagram.com/embed.js"></script>
+  <meta charset="UTF-8">
+  <title>DramaNote</title>
+  <link rel="icon" href="/DreadNote/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="DreadNote/favicon2.png" sizes="180x180">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      font-size: 17px;
+      background: #ffffff;
+      color: #1c1c1e;
+    }
+
+    section {
+      margin: 0;
+      position: relative;
+    }
+
+    [hidden] {
+      display: none;
+    }
+
+    input,
+    button {
+      font-size: 17px;
+      margin: 4px 0;
+    }
+
+    ul {
+      padding-left: 0;
+      margin: 0;
+    }
+
+    li {
+      list-style: none;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      user-select: none;
+      cursor: default;
+    }
+
+    li:hover {
+      background: #f2f2f7;
+    }
+
+    li .memo-title {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 8px;
+    }
+
+    .menu-btn,
+    .longpress-btn {
+      user-select: none;
+    }
+
+    #title {
+      border: none;
+      background: transparent;
+      color: inherit;
+      font-size: 21px;
+    }
+
+    #editor {
+      min-height: 70vh;
+      padding: 0px;
+      outline: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-top: 1px solid #ccc;
+      padding-top: 17px;
+
+      /* iPhoneメモ風 16pxから変更*/
+      font-size: 17px;
+      line-height: 1.75;
+      letter-spacing: 0.025em;
+      color: #1c1c1e;
+      /* iOS標準テキスト色 */
+    }
+
+    #editor a {
+      color: #1c1c1e;
+      text-decoration: none;
+    }
+
+    #editor a:hover,
+    #editor a:focus,
+    #editor a:active {
+      text-decoration: none;
+    }
+
+
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 8px 0;
+    }
+
+    .video {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      margin: 0;
+    }
+
+    .video iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .memo-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .date-span {
+      font-size: 0.7em;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .menu-popup {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 4px 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      display: none;
+      z-index: 10;
+    }
+
+    .menu-popup button {
+      width: 100%;
+      text-align: left;
+      padding: 4px 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .menu-popup button:hover {
+      background: #eee;
+    }
+
+    #user-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+    }
+
+    #user-menu {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      display: none;
+      z-index: 100;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    #user-menu button {
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      background: none;
+      border: none;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    #user-menu button:hover {
+      background: #f2f2f7;
+    }
+
+    #toast {
+      display: none;
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+
+    #toast.show {
+      display: block;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .preview-popup {
+      display: none;
+      position: fixed;
+      background: #fff;
+      border: 1px solid #333;
+      padding: 8px;
+      z-index: 1000;
+      max-width: 80%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .longpress-btn {
+      background: #eee;
+      border: 1px solid #ccc;
+      padding: 4px 8px;
+      border-radius: 4px;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    /* Disable underline on all links (including hover, focus, active, visited) */
+    a,
+    a:hover,
+    a:focus,
+    a:active,
+    a:visited {
+      text-decoration: none !important;
+    }
+
+    /* Dark mode styles */
+    body.dark {
+      background: #000;
+      color: #f2f2f7;
+    }
+
+    body.dark #editor {
+      color: #f2f2f7;
+      border-top-color: #333;
+    }
+
+    body.dark li {
+      border-bottom-color: #333;
+    }
+
+    body.dark li:hover {
+      background: #1c1c1e;
+    }
+
+    body.dark #user-menu {
+      background: #1c1c1e;
+      border-color: #333;
+    }
+
+    body.dark #user-menu button {
+      color: #f2f2f7;
+    }
+
+    body.dark #editor a {
+      color: #f2f2f7;
+    }
+
+
+    /* ボタンの基本サイズ */
+    .menu-btn,
+    .longpress-btn {
+      font-size: 18px;
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+
+    /* ボタン内アイコンのサイズ */
+    .menu-btn img,
+    .longpress-btn img,
+    #user-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    /* ドロップダウンメニューのサイズ */
+    .menu-popup {
+      padding: 6px 0;
+      border-radius: 6px;
+    }
+
+    .menu-popup button {
+      font-size: 17px;
+      padding: 8px 16px;
+      border-radius: 6px;
+    }
+
+    /* ダークモード対応 */
+    body.dark .menu-btn,
+    body.dark .longpress-btn {
+      background: #1c1c1e;
+      color: #f2f2f7;
+      border-color: #333;
+    }
+
+    body.dark .menu-popup {
+      background: #1c1c1e;
+      border-color: #333;
+    }
+
+    body.dark .menu-popup button {
+      color: #f2f2f7;
+    }
+
+    body.dark .menu-popup button:hover {
+      background: #333;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 
 <body>
 
-	<section id="view-login">
-		<h2>DreadNote Login</h2>
-		<input id="email" placeholder="email"><br>
-		<input id="password" type="password" placeholder="password"><br>
-		<button id="login">Login</button>
-		<button id="signup">Sign up</button><br><br>
-		<button id="google-login">Login with Google</button>
-	</section>
+  <section id="view-login">
+    <h2>DreadNote Login</h2>
+    <input id="email" placeholder="email"><br>
+    <input id="password" type="password" placeholder="password"><br>
+    <button id="login">Login</button>
+    <button id="signup">Sign up</button><br><br>
+    <button id="google-login">Login with Google</button>
+  </section>
 
-	<section id="view-list" hidden>
-		<div class="flex-between">
-			<h2>Notes</h2>
-			<div style="display:flex;gap:8px;align-items:center;">
-				<button id="new-memo">＋</button>
-				<button id="go-trash">🗑️</button>
-				<img id="user-icon" src="" title="User Menu">
-				<div id="user-menu">
-					<button id="dark-btn">Darkmode</button>
-					<button id="logout-btn">Logout</button>
-				</div>
-			</div>
-		</div>
-		<ul id="memo-list"></ul>
-	</section>
+  <section id="view-list" hidden>
+    <div class="flex-between">
+      <h2>Notes</h2>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="new-memo">＋</button>
+        <button id="go-trash">🗑️</button>
+        <img id="user-icon" src="" title="User Menu">
+        <div id="user-menu">
+          <button id="dark-btn">Darkmode</button>
+          <button id="logout-btn">Logout</button>
+        </div>
+      </div>
+    </div>
+    <ul id="memo-list"></ul>
+  </section>
 
-	<section id="view-trash" hidden>
-		<div class="flex-between">
-			<h2>Trash 🗑️</h2>
-			<button id="back-list"> ← </button>
-		</div>
-		<ul id="trash-list"></ul>
-	</section>
+  <section id="view-trash" hidden>
+    <div class="flex-between">
+      <h2>Trash 🗑️</h2>
+      <button id="back-list"> ← </button>
+    </div>
+    <ul id="trash-list"></ul>
+  </section>
 
-	<section id="view-editor" hidden>
-		<button id="back"> ← </button>
-		<input id="title" placeholder="">
-		<div id="editor" contenteditable="true"></div>
-	</section>
+  <section id="view-editor" hidden>
+    <button id="back"> ← </button>
+    <input id="title" placeholder="">
+    <div id="editor" contenteditable="true"></div>
+  </section>
 
-	<div id="toast"></div>
+  <div id="toast"></div>
 
-	<div id="preview" class="preview-popup">
-		<div id="preview-content"></div>
-		<button id="copy-note">Copy</button>
-		<button id="delete-note">Delete</button>
-		<button id="close-preview">Close</button>
-	</div>
+  <div id="preview" class="preview-popup">
+    <div id="preview-content"></div>
+    <button id="copy-note">Copy</button>
+    <button id="delete-note">Delete</button>
+    <button id="close-preview">Close</button>
+  </div>
 
-	<script type="module">
-		import { getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-		import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-		import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-		import { getFirestore, collection, addDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <script type="module">
+    import { getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-		let metaCache = null;        // ← 目次箱
-		const memoCache = {};       // ← 本文キャッシュ
+    let metaCache = null;        // ← 目次箱
+    const memoCache = {};       // ← 本文キャッシュ
 
-		/* Firebase初期化 */
-		const firebaseConfig = { apiKey: "AIzaSyCdDf0GH80PoGlcbk2yjlaVQfP01Gk9m18", authDomain: "noteeditor-ba1db.firebaseapp.com", projectId: "noteeditor-ba1db" };
-		const app = initializeApp( firebaseConfig );
-		const auth = getAuth( app );
-		const db = getFirestore( app );
+    /* Firebase初期化 */
+    const firebaseConfig = { apiKey: "AIzaSyCdDf0GH80PoGlcbk2yjlaVQfP01Gk9m18", authDomain: "noteeditor-ba1db.firebaseapp.com", projectId: "noteeditor-ba1db" };
+    const app = initializeApp( firebaseConfig );
+    const auth = getAuth( app );
+    const db = getFirestore( app );
 
-		/* DOM要素 */
-		const views = { login: document.getElementById( 'view-login' ), list: document.getElementById( 'view-list' ), trash: document.getElementById( 'view-trash' ), editor: document.getElementById( 'view-editor' ) };
-		const emailInput = document.getElementById( 'email' );
-		const passwordInput = document.getElementById( 'password' );
-		const memoList = document.getElementById( 'memo-list' );
-		const trashList = document.getElementById( 'trash-list' );
-		const editor = document.getElementById( 'editor' );
-		const titleInput = document.getElementById( 'title' );
-		const userIcon = document.getElementById( 'user-icon' );
-		const userMenu = document.getElementById( 'user-menu' );
+    /* DOM要素 */
+    const views = { login: document.getElementById( 'view-login' ), list: document.getElementById( 'view-list' ), trash: document.getElementById( 'view-trash' ), editor: document.getElementById( 'view-editor' ) };
+    const emailInput = document.getElementById( 'email' );
+    const passwordInput = document.getElementById( 'password' );
+    const memoList = document.getElementById( 'memo-list' );
+    const trashList = document.getElementById( 'trash-list' );
+    const editor = document.getElementById( 'editor' );
+    const titleInput = document.getElementById( 'title' );
+    const userIcon = document.getElementById( 'user-icon' );
+    const userMenu = document.getElementById( 'user-menu' );
 
-		// Dark mode toggle
-		const darkBtn = document.getElementById( 'dark-btn' );
+    // Dark mode toggle
+    const darkBtn = document.getElementById( 'dark-btn' );
 
-		if ( darkBtn ) {
-			darkBtn.onclick = ( e ) => {
-				e.stopPropagation();
-				document.body.classList.toggle( 'dark' );
-				localStorage.setItem(
-					'dreadnote-dark',
-					document.body.classList.contains( 'dark' ) ? '1' : '0'
-				);
-			};
-		}
+    if ( darkBtn ) {
+      darkBtn.onclick = ( e ) => {
+        e.stopPropagation();
+        document.body.classList.toggle( 'dark' );
+        localStorage.setItem(
+          'dreadnote-dark',
+          document.body.classList.contains( 'dark' ) ? '1' : '0'
+        );
+      };
+    }
 
-		// 初期化（保存状態を反映）
-		if ( localStorage.getItem( 'dreadnote-dark' ) === '1' ) {
-			document.body.classList.add( 'dark' );
-		}
-		const toast = document.getElementById( 'toast' );
-		const preview = document.getElementById( 'preview' );
-		const previewContent = document.getElementById( 'preview-content' );
-		const copyBtn = document.getElementById( 'copy-note' );
-		const deleteBtn = document.getElementById( 'delete-note' );
-		const closePreview = document.getElementById( 'close-preview' );
+    // 初期化（保存状態を反映）
+    if ( localStorage.getItem( 'dreadnote-dark' ) === '1' ) {
+      document.body.classList.add( 'dark' );
+    }
+    const toast = document.getElementById( 'toast' );
+    const preview = document.getElementById( 'preview' );
+    const previewContent = document.getElementById( 'preview-content' );
+    const copyBtn = document.getElementById( 'copy-note' );
+    const deleteBtn = document.getElementById( 'delete-note' );
+    const closePreview = document.getElementById( 'close-preview' );
 
-		let currentMemoId = null;
-		let longPressTimer = null;
-		// let memosCache=[];
+    let currentMemoId = null;
+    let longPressTimer = null;
+    // let memosCache=[];
 
-		/* トースト表示 */
-		function showToast( msg, d = 2000 ) { toast.textContent = msg; toast.classList.add( 'show' ); setTimeout( () => toast.classList.remove( 'show' ), d ); }
-		function show( view ) { Object.values( views ).forEach( v => v.hidden = true ); views[view].hidden = false; }
+    /* トースト表示 */
+    function showToast( msg, d = 2000 ) { toast.textContent = msg; toast.classList.add( 'show' ); setTimeout( () => toast.classList.remove( 'show' ), d ); }
+    function show( view ) { Object.values( views ).forEach( v => v.hidden = true ); views[view].hidden = false; }
 
-		/* Auth */
-		const provider = new GoogleAuthProvider();
-		document.getElementById( 'login' ).onclick = async () => { try { await signInWithEmailAndPassword( auth, emailInput.value, passwordInput.value ); } catch ( e ) { showToast( "ログイン失敗: " + e.message ); } };
-		document.getElementById( 'signup' ).onclick = async () => { try { await createUserWithEmailAndPassword( auth, emailInput.value, passwordInput.value ); } catch ( e ) { showToast( "サインアップ失敗: " + e.message ); } };
-		document.getElementById( 'google-login' ).onclick = async () => { try { await signInWithPopup( auth, provider ); } catch ( e ) { showToast( "Googleログイン失敗: " + e.message ); } };
-		userIcon.onclick = () => { userMenu.style.display = ( userMenu.style.display === 'block' ) ? 'none' : 'block'; }
-		const switchAccountBtn = document.getElementById( 'switch-account' );
-		if ( switchAccountBtn ) {
-			switchAccountBtn.onclick = async () => {
-				userMenu.style.display = 'none';
-				try {
-					await signInWithPopup( auth, provider );
-				} catch ( e ) {
-					showToast( "切替失敗" );
-				}
-			};
-		}
-		document.getElementById( 'logout-btn' ).onclick = () => { userMenu.style.display = 'none'; signOut( auth ); location.hash = '#login'; }
-		document.addEventListener( 'click', e => {
-			if ( !userMenu.contains( e.target ) && e.target !== userIcon ) userMenu.style.display = 'none';
-			document.querySelectorAll( '.menu-popup' ).forEach( menu => {
-				const btn = menu.previousSibling;
-				if ( !menu.contains( e.target ) && !btn.contains( e.target ) ) menu.style.display = 'none';
-			} );
-		} );
-
-		/* Auth state */
-		onAuthStateChanged( auth, async user => {
-			if ( !user ) {
-				location.hash = '#login';
-				show( 'login' );
-				return;
-			}
-
-			if ( user.photoURL ) userIcon.src = user.photoURL;
-
-			// ★ 必ずここで遷移処理
-			if ( !location.hash || location.hash === '#login' ) {
-				location.hash = '#/list';
-			}
-
-			await navigate(); // ← 必ず呼ぶ
-
-      // 過去のYouTubeリンクをiframeに置換
-      async function fixOldYouTubeMemos() {
-        await loadMetaOnce();
-        let changed = false;
-        for (const m of metaCache.memos) {
-          if (!m.deleted && m.id) {
-            const docRef = doc(db, 'users', auth.currentUser.uid, 'memos', m.id);
-            const snap = await getDoc(docRef);
-            const data = snap.data();
-            if (!data || !data.content) continue;
-            let content = data.content;
-            // YouTube URLをiframeに変換
-            const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/g;
-            let replaced = false;
-            content = content.replace(ytRegex, (match, p1) => {
-              replaced = true;
-              return `<div class="video youtube"><iframe src="https://www.youtube-nocookie.com/embed/${p1}?modestbranding=1&rel=0&playsinline=1" allow="autoplay; fullscreen" allowfullscreen></iframe></div>`;
-            });
-            if (replaced) {
-              await setDoc(docRef, { content }, { merge: true });
-              memoCache[m.id] = { ...data, content };
-              changed = true;
-            }
-          }
+    /* Auth */
+    const provider = new GoogleAuthProvider();
+    document.getElementById( 'login' ).onclick = async () => { try { await signInWithEmailAndPassword( auth, emailInput.value, passwordInput.value ); } catch ( e ) { showToast( "ログイン失敗: " + e.message ); } };
+    document.getElementById( 'signup' ).onclick = async () => { try { await createUserWithEmailAndPassword( auth, emailInput.value, passwordInput.value ); } catch ( e ) { showToast( "サインアップ失敗: " + e.message ); } };
+    document.getElementById( 'google-login' ).onclick = async () => { try { await signInWithPopup( auth, provider ); } catch ( e ) { showToast( "Googleログイン失敗: " + e.message ); } };
+    userIcon.onclick = () => { userMenu.style.display = ( userMenu.style.display === 'block' ) ? 'none' : 'block'; }
+    const switchAccountBtn = document.getElementById( 'switch-account' );
+    if ( switchAccountBtn ) {
+      switchAccountBtn.onclick = async () => {
+        userMenu.style.display = 'none';
+        try {
+          await signInWithPopup( auth, provider );
+        } catch ( e ) {
+          showToast( "切替失敗" );
         }
-        if (changed) {
-          await loadMemos();
+      };
+    }
+    document.getElementById( 'logout-btn' ).onclick = () => { userMenu.style.display = 'none'; signOut( auth ); location.hash = '#login'; }
+    document.addEventListener( 'click', e => {
+      if ( !userMenu.contains( e.target ) && e.target !== userIcon ) userMenu.style.display = 'none';
+      document.querySelectorAll( '.menu-popup' ).forEach( menu => {
+        const btn = menu.previousSibling;
+        if ( !menu.contains( e.target ) && !btn.contains( e.target ) ) menu.style.display = 'none';
+      } );
+    } );
+
+    /* Auth state */
+    onAuthStateChanged( auth, async user => {
+      if ( !user ) {
+        location.hash = '#login';
+        show( 'login' );
+        return;
+      }
+
+      if ( user.photoURL ) userIcon.src = user.photoURL;
+
+      // ★ 必ずここで遷移処理
+      if ( !location.hash || location.hash === '#login' ) {
+        location.hash = '#/list';
+      }
+
+      await navigate(); // ← 必ず呼ぶ
+    } );
+    window.addEventListener( 'hashchange', () => {
+      if ( !auth.currentUser ) return;
+      navigate();
+    } );
+
+    async function loadMetaOnce() {
+      if ( metaCache ) return metaCache;
+
+      let metaWasFixed = false;
+
+      const metaRef = doc( db, 'users', auth.currentUser.uid, 'meta', 'main' );
+      const snap = await getDoc( metaRef );
+
+      if ( snap.exists() ) {
+        metaCache = snap.data();
+        if ( !Array.isArray( metaCache.memos ) ) {
+          metaCache.memos = [];
+          metaWasFixed = true;
+        }
+      } else {
+        metaCache = { memos: [] };
+        metaWasFixed = true;
+      }
+
+      // 🔁 meta が空なら Firestore から1回だけ復元
+      if ( metaCache.memos.length === 0 ) {
+        const memosSnap = await getDocs(
+          collection( db, 'users', auth.currentUser.uid, 'memos' )
+        );
+
+        metaCache.memos = memosSnap.docs.map( d => {
+          const m = d.data();
+          return {
+            id: d.id,
+            title: m.title || '',
+            updated: m.updated || Date.now(),
+            deleted: !!m.deletedAt
+          };
+        } );
+
+        metaWasFixed = true;
+      }
+
+      // 🧠 正規化（壊れたデータ防止）
+      metaCache.memos.forEach( m => {
+        if ( typeof m.deleted !== 'boolean' ) {
+          m.deleted = false;
+          metaWasFixed = true;
+        }
+        if ( typeof m.title !== 'string' ) {
+          m.title = '';
+          metaWasFixed = true;
+        }
+        if ( typeof m.updated !== 'number' ) {
+          m.updated = Date.now();
+          metaWasFixed = true;
+        }
+      } );
+
+      // ✅ 「直した時だけ」保存
+      if ( metaWasFixed ) {
+        await setDoc( metaRef, metaCache );
+      }
+
+      return metaCache;
+    } async function loadMemos() {
+      await loadMetaOnce();
+      memoList.innerHTML = '';
+
+      metaCache.memos
+        .filter( m => !m.deleted )
+        .sort( ( a, b ) => b.updated - a.updated )
+        .forEach( m => {
+
+          const li = document.createElement( 'li' );
+
+          const titleSpan = document.createElement( 'span' );
+          titleSpan.className = 'memo-title';
+          titleSpan.textContent = m.title || 'Untitled';
+          li.appendChild( titleSpan );
+
+          /* 右側 */
+          const rightDiv = document.createElement( 'div' );
+          rightDiv.className = 'memo-right';
+
+          const dateSpan = document.createElement( 'span' );
+          dateSpan.className = 'date-span';
+          dateSpan.textContent =
+            new Date( m.updated ).toLocaleString( 'ja-JP', {
+              year: 'numeric', month: '2-digit', day: '2-digit',
+              hour: '2-digit', minute: '2-digit'
+            } );
+
+          /* ⋯ メニュー */
+          const menuBtn = document.createElement( 'button' );
+          menuBtn.textContent = '⋯';
+          menuBtn.className = 'menu-btn';
+
+          const menuPopup = document.createElement( 'div' );
+          menuPopup.className = 'menu-popup';
+
+          const copyBtn = document.createElement( 'button' );
+          copyBtn.textContent = '❐';
+          copyBtn.onclick = async ( e ) => {
+            e.stopPropagation();
+            const snap = await getDoc(
+              doc( db, 'users', auth.currentUser.uid, 'memos', m.id )
+            );
+            navigator.clipboard.writeText( snap.data()?.content || '' );
+            showToast( 'Copied' );
+            menuPopup.style.display = 'none';
+          };
+
+          const delBtn = document.createElement( 'button' );
+          delBtn.textContent = '🗑️';
+          delBtn.onclick = async ( e ) => {
+            e.stopPropagation();
+            m.deleted = true;
+            m.updated = Date.now();
+            await saveMeta();
+            loadMemos();
+            showToast( 'Moved to Trash' );
+            menuPopup.style.display = 'none';
+          };
+
+          menuPopup.append( copyBtn, delBtn );
+          menuBtn.onclick = e => {
+            e.stopPropagation();
+            menuPopup.style.display =
+              menuPopup.style.display === 'block' ? 'none' : 'block';
+          };
+
+          rightDiv.append( dateSpan, menuBtn, menuPopup );
+          li.appendChild( rightDiv );
+
+          li.onclick = () => {
+            location.hash = `#/editor/${m.id}`;
+          };
+
+          memoList.appendChild( li );
+        } );
+    }
+
+    /* Trash表示 */
+    function loadTrash() {
+      if ( !metaCache || !Array.isArray( metaCache.memos ) ) return;
+      trashList.innerHTML = '';
+
+      metaCache.memos
+        .filter( m => m.deleted )
+        .sort( ( a, b ) => b.updated - a.updated )
+        .forEach( m => {
+          const li = document.createElement( 'li' );
+
+          // タイトル
+          const titleSpan = document.createElement( 'span' );
+          titleSpan.textContent = m.title || 'Untitled';
+          li.appendChild( titleSpan );
+
+          // 右側の操作領域
+          const rightDiv = document.createElement( 'div' );
+          rightDiv.className = 'memo-right';
+
+          // 日付表示
+          const dateSpan = document.createElement( 'span' );
+          dateSpan.className = 'date-span';
+          dateSpan.textContent = new Date( m.updated ).toLocaleString( 'ja-JP', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
+          } );
+
+          // 復元ボタン
+          const restoreBtn = document.createElement( 'button' );
+          restoreBtn.textContent = '↩️';
+          restoreBtn.onclick = async e => {
+            e.stopPropagation();
+            await updateMeta( m.id, { deleted: false, updated: Date.now() } );
+            loadTrash();
+            await loadMemos(); // メモ一覧も更新
+          };
+
+          // ⋯ メニュー
+          const menuBtn = document.createElement( 'button' );
+          menuBtn.textContent = '⋯';
+          menuBtn.className = 'menu-btn';
+
+          const menuPopup = document.createElement( 'div' );
+          menuPopup.className = 'menu-popup';
+
+          // 完全削除ボタン
+          const delBtn = document.createElement( 'button' );
+          delBtn.textContent = 'Delete Permanently';
+          delBtn.onclick = async e => {
+            e.stopPropagation();
+            // Firestoreのドキュメントを削除
+            await setDoc(
+              doc( db, 'users', auth.currentUser.uid, 'memos', m.id ),
+              {}, // 空オブジェクトで上書き（必要に応じて deleteDoc に変更可）
+              { merge: true }
+            );
+            // meta からも削除
+            metaCache.memos = metaCache.memos.filter( mm => mm.id !== m.id );
+            await saveMeta();
+            loadTrash();
+            showToast( 'Deleted permanently' );
+          };
+
+          menuPopup.appendChild( delBtn );
+          menuBtn.onclick = e => {
+            e.stopPropagation();
+            menuPopup.style.display =
+              menuPopup.style.display === 'block' ? 'none' : 'block';
+          };
+
+          // 右側 div に追加（順序：日付 → 復元 → メニュー）
+          rightDiv.append( dateSpan, restoreBtn, menuBtn, menuPopup );
+          li.appendChild( rightDiv );
+
+          trashList.appendChild( li );
+        } );
+    }
+    async function openEditor( id ) {
+      currentMemoId = id;
+
+      if ( memoCache[id] ) {
+        showEditor( memoCache[id] );
+        return;
+      }
+
+      const snap = await getDoc( doc( db, 'users', auth.currentUser.uid, 'memos', id ) );
+      const data = snap.data();
+      memoCache[id] = data;
+      showEditor( data );
+    }
+
+    // function showEditor(data){
+    //   titleInput.value=data.title||'';
+    //   editor.innerHTML=data.content||'';
+    //   show('editor');
+    // }
+
+    function showEditor( data ) {
+      titleInput.value = data.title || '';
+      editor.innerHTML = data.content || '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
+      show( 'editor' );
+    }
+    let saveTimer = null;
+
+    function debounceSave() {
+      clearTimeout( saveTimer );
+      saveTimer = setTimeout( saveMemo, 500 );
+    }
+
+    titleInput.addEventListener( 'input', debounceSave );
+    editor.addEventListener( 'input', debounceSave );
+
+    async function saveMemo() {
+      if ( !currentMemoId ) return;
+
+      const title =
+        titleInput.value.trim() ||
+        editor.innerText.split( '\n' )[0]?.trim() || '';
+
+      const content = editor.innerHTML;
+      const updated = Date.now();
+
+      memoCache[currentMemoId] = { title, content, updated };
+
+      await setDoc(
+        doc( db, 'users', auth.currentUser.uid, 'memos', currentMemoId ),
+        { title, content, updated },
+        { merge: true }
+      );
+
+      await updateMeta( currentMemoId, { title, updated } );
+    }
+
+    async function saveMeta() {
+      await setDoc(
+        doc( db, 'users', auth.currentUser.uid, 'meta', 'main' ),
+        metaCache
+      );
+    }
+
+    function getMeta( id ) {
+      return metaCache.memos.find( m => m.id === id );
+    }
+
+    async function updateMeta( id, fields ) {
+      const m = getMeta( id );
+      if ( !m ) return;
+      Object.assign( m, fields );
+      await saveMeta();
+    }
+    // updateMeta(currentMemoId, title);
+
+
+    /* Paste処理（Base64 直接保存版） */
+    editor.addEventListener( 'paste', async e => {
+      e.preventDefault();
+      const range = document.getSelection().getRangeAt( 0 );
+      const items = e.clipboardData.items || [];
+      const files = e.clipboardData.files || [];
+
+      async function processFile( file ) {
+        const img = new Image();
+        img.src = URL.createObjectURL( file );
+        await img.decode(); // 画像読み込み完了まで待つ
+
+        // リサイズ
+        const maxWidth = 1024;
+        let width = img.width;
+        let height = img.height;
+        if ( width > maxWidth ) {
+          height = ( height / width ) * maxWidth;
+          width = maxWidth;
+        }
+
+        const canvas = document.createElement( 'canvas' );
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext( '2d' );
+        ctx.drawImage( img, 0, 0, width, height );
+
+        // Canvas → Blob に変換
+        const blob = await new Promise( resolve => canvas.toBlob( resolve, 'image/jpeg', 0.8 ) );
+
+        // Blob → URL
+        const blobUrl = URL.createObjectURL( blob );
+
+        // 挿入
+        const imgEl = document.createElement( 'img' );
+        imgEl.src = blobUrl;
+        range.insertNode( imgEl );
+        range.collapse( false );
+
+        saveMemo();
+      }
+
+      // クリップボードの items から画像を探す
+      for ( const item of items ) {
+        if ( item.type.startsWith( 'image/' ) ) {
+          const file = item.getAsFile();
+          await processFile( file );
+          return;
         }
       }
-      await fixOldYouTubeMemos();
-		} );
-		window.addEventListener( 'hashchange', () => {
-			if ( !auth.currentUser ) return;
-			navigate();
-		} );
 
-		async function loadMetaOnce() {
-			if ( metaCache ) return metaCache;
+      // files から画像を探す
+      if ( files.length > 0 && files[0].type.startsWith( 'image/' ) ) {
+        await processFile( files[0] );
+        return;
+      }
 
-			let metaWasFixed = false;
+      // 2️⃣ テキスト処理
+      const text = e.clipboardData.getData( 'text/plain' );
+      const url = text.trim();
 
-			const metaRef = doc( db, 'users', auth.currentUser.uid, 'meta', 'main' );
-			const snap = await getDoc( metaRef );
+      // helper: insert element and collapse
+      const insertEl = ( el ) => { range.insertNode( el ); range.collapse( false ); saveMemo(); };
 
-			if ( snap.exists() ) {
-				metaCache = snap.data();
-				if ( !Array.isArray( metaCache.memos ) ) {
-					metaCache.memos = [];
-					metaWasFixed = true;
-				}
-			} else {
-				metaCache = { memos: [] };
-				metaWasFixed = true;
-			}
+      // 2-1. YouTube
+      let yt = url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/ );
+      if ( yt ) {
+        const wrap = document.createElement( 'div' );
+        wrap.className = 'video';
+        const iframe = document.createElement( 'iframe' );
+        iframe.src = `https://www.youtube-nocookie.com/embed/${yt[1]}?modestbranding=1&rel=0&playsinline=1`;
+        iframe.allowFullscreen = true;
+        wrap.appendChild( iframe );
+        insertEl( wrap );
+        return;
+      }
 
-			// 🔁 meta が空なら Firestore から1回だけ復元
-			if ( metaCache.memos.length === 0 ) {
-				const memosSnap = await getDocs(
-					collection( db, 'users', auth.currentUser.uid, 'memos' )
-				);
+      // 2-2. ニコニコ動画
+      // ニコニコ動画
+// ニコニコ動画
+let nico = url.match( /nicovideo\.jp\/watch\/([\w]+)/ );
+if ( nico ) {
+  const wrap = document.createElement('div');
+  wrap.className = 'video'; // YouTubeと同じクラス
 
-				metaCache.memos = memosSnap.docs.map( d => {
-					const m = d.data();
-					return {
-						id: d.id,
-						title: m.title || '',
-						updated: m.updated || Date.now(),
-						deleted: !!m.deletedAt
-					};
-				} );
+  const iframe = document.createElement('iframe');
+  iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
+  iframe.setAttribute('frameborder', '0');
+  iframe.setAttribute('allowfullscreen', ''); // ここが重要
+  iframe.setAttribute('allow', 'fullscreen');
+  wrap.appendChild(iframe);
 
-				metaWasFixed = true;
-			}
+  insertEl(wrap);
+  return;
+}
 
-			// 🧠 正規化（壊れたデータ防止）
-			metaCache.memos.forEach( m => {
-				if ( typeof m.deleted !== 'boolean' ) {
-					m.deleted = false;
-					metaWasFixed = true;
-				}
-				if ( typeof m.title !== 'string' ) {
-					m.title = '';
-					metaWasFixed = true;
-				}
-				if ( typeof m.updated !== 'number' ) {
-					m.updated = Date.now();
-					metaWasFixed = true;
-				}
-			} );
+      // 2-6. 画像
 
-			// ✅ 「直した時だけ」保存
-			if ( metaWasFixed ) {
-				await setDoc( metaRef, metaCache );
-			}
+      const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
+      if ( imgRegex.test( url ) ) {
+        const img = document.createElement( 'img' );
+        img.src = url;
+        img.style.cursor = 'pointer';
 
-			return metaCache;
-		} async function loadMemos() {
-			await loadMetaOnce();
-			memoList.innerHTML = '';
+        img.addEventListener( 'click', e => {
+          e.preventDefault();
+          e.stopPropagation(); // ← 超重要
+          window.open( url, '_blank', 'noopener' );
+        } );
 
-			metaCache.memos
-				.filter( m => !m.deleted )
-				.sort( ( a, b ) => b.updated - a.updated )
-				.forEach( m => {
+        insertEl( img );
+        return;
+      }
 
-					const li = document.createElement( 'li' );
+      //   // 2-7. 通常URL（カード＋生URL表示）
+      //   const linkRegex = /^https?:\/\/\S+$/;
+      //   if ( linkRegex.test( url ) ) {
+      //     const container = document.createElement( 'div' );
+      //     container.style.margin = '8px 0';
 
-					const titleSpan = document.createElement( 'span' );
-					titleSpan.className = 'memo-title';
-					titleSpan.textContent = m.title || 'Untitled';
-					li.appendChild( titleSpan );
+      //     // カード本体
+      //     const card = document.createElement( 'div' );
+      //     card.style.border = '1px solid #ddd';
+      //     card.style.borderRadius = '6px';
+      //     card.style.padding = '8px';
+      //     card.style.display = 'flex';
+      //     card.style.alignItems = 'center';
+      //     card.style.gap = '8px';
+      //     card.style.cursor = 'pointer';
+      //     card.contentEditable = false;
 
-					/* 右側 */
-					const rightDiv = document.createElement( 'div' );
-					rightDiv.className = 'memo-right';
+      //     const icon = document.createElement( 'img' );
+      //     icon.src = 'https://www.google.com/s2/favicons?domain=' + url;
+      //     icon.width = 16;
+      //     icon.height = 16;
 
-					const dateSpan = document.createElement( 'span' );
-					dateSpan.className = 'date-span';
-					dateSpan.textContent =
-						new Date( m.updated ).toLocaleString( 'ja-JP', {
-							year: 'numeric', month: '2-digit', day: '2-digit',
-							hour: '2-digit', minute: '2-digit'
-						} );
+      //     const titleSpan = document.createElement( 'span' );
+      //     titleSpan.style.fontWeight = 'bold';
+      //     titleSpan.style.fontSize = '0.9em';
+      //     titleSpan.style.overflow = 'hidden';
+      //     titleSpan.style.textOverflow = 'ellipsis';
+      //     titleSpan.style.whiteSpace = 'nowrap';
 
-					/* ⋯ メニュー */
-					const menuBtn = document.createElement( 'button' );
-					menuBtn.textContent = '⋯';
-					menuBtn.className = 'menu-btn';
+      //     // タイトル取得（失敗したら必ずホスト名）
+      //     ( async () => {
+      //       let text = '';
 
-					const menuPopup = document.createElement( 'div' );
-					menuPopup.className = 'menu-popup';
+      //       try {
+      //         const res = await fetch( url, { mode: 'cors' } );
+      //         const html = await res.text();
+      //         const doc = new DOMParser().parseFromString( html, 'text/html' );
+      //         const title = doc.querySelector( 'title' )?.innerText?.trim();
+      //         if ( title ) text = title;
+      //       } catch { }
 
-					const copyBtn = document.createElement( 'button' );
-					copyBtn.textContent = '❐';
-					copyBtn.onclick = async ( e ) => {
-						e.stopPropagation();
-						const snap = await getDoc(
-							doc( db, 'users', auth.currentUser.uid, 'memos', m.id )
-						);
-						navigator.clipboard.writeText( snap.data()?.content || '' );
-						showToast( 'Copied' );
-						menuPopup.style.display = 'none';
-					};
+      //       // フォールバック：ホスト名
+      //       if ( !text ) {
+      //         try {
+      //           text = new URL( url ).hostname;
+      //         } catch { }
+      //       }
 
-					const delBtn = document.createElement( 'button' );
-					delBtn.textContent = '🗑️';
-					delBtn.onclick = async ( e ) => {
-						e.stopPropagation();
-						m.deleted = true;
-						m.updated = Date.now();
-						await saveMeta();
-						loadMemos();
-						showToast( 'Moved to Trash' );
-						menuPopup.style.display = 'none';
-					};
+      //       if ( text ) {
+      //         titleSpan.textContent = text;
+      //         titleSpan.style.display = '';
+      //       } else {
+      //         titleSpan.style.display = 'none';
+      //       }
+      //     } )();
 
-					menuPopup.append( copyBtn, delBtn );
-					menuBtn.onclick = e => {
-						e.stopPropagation();
-						menuPopup.style.display =
-							menuPopup.style.display === 'block' ? 'none' : 'block';
-					};
+      //     card.append( icon, titleSpan );
 
-					rightDiv.append( dateSpan, menuBtn, menuPopup );
-					li.appendChild( rightDiv );
+      //     card.addEventListener( 'click', e => {
+      //       e.preventDefault();
+      //       e.stopPropagation();
+      //       window.open( url, '_blank', 'noopener' );
+      //     } );
 
-					li.onclick = () => {
-						location.hash = `#/editor/${m.id}`;
-					};
+      //     // 生リンク（いじらない）
+      //     const linkLine = document.createElement( 'a' );
+      //     linkLine.href = url;
+      //     linkLine.textContent = url;
+      //     linkLine.target = '_blank';
+      //     linkLine.rel = 'noopener';
+      //     linkLine.style.display = 'block';
+      //     linkLine.style.marginTop = '4px';
 
-					memoList.appendChild( li );
-				} );
-		}
+      //     container.append( card, linkLine );
+      //     insertEl( container );
+      //     return;
+      //   }
+      //   // 2-8. 通常テキスト
+      insertEl( document.createTextNode( url ) );
+    } );
 
-		/* Trash表示 */
-		function loadTrash() {
-			if ( !metaCache || !Array.isArray( metaCache.memos ) ) return;
-			trashList.innerHTML = '';
+    // // contenteditable 内のリンクを再表示後も確実に開けるようにする
+    // editor.addEventListener( 'click', e => {
+    //   const a = e.target.closest( 'a' );
+    //   if ( !a ) return;
 
-			metaCache.memos
-				.filter( m => m.deleted )
-				.sort( ( a, b ) => b.updated - a.updated )
-				.forEach( m => {
-					const li = document.createElement( 'li' );
+    //   const href = a.getAttribute( 'href' );
+    //   if ( !href ) return;
 
-					// タイトル
-					const titleSpan = document.createElement( 'span' );
-					titleSpan.textContent = m.title || 'Untitled';
-					li.appendChild( titleSpan );
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   window.open( href, '_blank', 'noopener' );
+    // } );
 
-					// 右側の操作領域
-					const rightDiv = document.createElement( 'div' );
-					rightDiv.className = 'memo-right';
-
-					// 日付表示
-					const dateSpan = document.createElement( 'span' );
-					dateSpan.className = 'date-span';
-					dateSpan.textContent = new Date( m.updated ).toLocaleString( 'ja-JP', {
-						year: 'numeric', month: '2-digit', day: '2-digit',
-						hour: '2-digit', minute: '2-digit'
-					} );
-
-					// 復元ボタン
-					const restoreBtn = document.createElement( 'button' );
-					restoreBtn.textContent = '↩️';
-					restoreBtn.onclick = async e => {
-						e.stopPropagation();
-						await updateMeta( m.id, { deleted: false, updated: Date.now() } );
-						loadTrash();
-						await loadMemos(); // メモ一覧も更新
-					};
-
-					// ⋯ メニュー
-					const menuBtn = document.createElement( 'button' );
-					menuBtn.textContent = '⋯';
-					menuBtn.className = 'menu-btn';
-
-					const menuPopup = document.createElement( 'div' );
-					menuPopup.className = 'menu-popup';
-
-					// 完全削除ボタン
-					const delBtn = document.createElement( 'button' );
-					delBtn.textContent = 'Delete Permanently';
-					delBtn.onclick = async e => {
-						e.stopPropagation();
-						// Firestoreのドキュメントを削除
-						await setDoc(
-							doc( db, 'users', auth.currentUser.uid, 'memos', m.id ),
-							{}, // 空オブジェクトで上書き（必要に応じて deleteDoc に変更可）
-							{ merge: true }
-						);
-						// meta からも削除
-						metaCache.memos = metaCache.memos.filter( mm => mm.id !== m.id );
-						await saveMeta();
-						loadTrash();
-						showToast( 'Deleted permanently' );
-					};
-
-					menuPopup.appendChild( delBtn );
-					menuBtn.onclick = e => {
-						e.stopPropagation();
-						menuPopup.style.display =
-							menuPopup.style.display === 'block' ? 'none' : 'block';
-					};
-
-					// 右側 div に追加（順序：日付 → 復元 → メニュー）
-					rightDiv.append( dateSpan, restoreBtn, menuBtn, menuPopup );
-					li.appendChild( rightDiv );
-
-					trashList.appendChild( li );
-				} );
-		}
-		async function openEditor( id ) {
-			currentMemoId = id;
-
-			if ( memoCache[id] ) {
-				showEditor( memoCache[id] );
-				return;
-			}
-
-			const snap = await getDoc( doc( db, 'users', auth.currentUser.uid, 'memos', id ) );
-			const data = snap.data();
-			memoCache[id] = data;
-			showEditor( data );
-		}
-
-		// function showEditor(data){
-		//   titleInput.value=data.title||'';
-		//   editor.innerHTML=data.content||'';
-		//   show('editor');
-		// }
-
-		function showEditor( data ) {
-			titleInput.value = data.title || '';
-			editor.innerHTML = data.content || '';
-			show( 'editor' );
-			// ★ YouTube iframeを再読み込み
-			editor.querySelectorAll( '.video iframe' ).forEach( iframe => {
-				const src = iframe.src;
-				iframe.src = src;
-			} );
-		}
-		let saveTimer = null;
-
-		function debounceSave() {
-			clearTimeout( saveTimer );
-			saveTimer = setTimeout( saveMemo, 500 );
-		}
-
-		titleInput.addEventListener( 'input', debounceSave );
-		editor.addEventListener( 'input', debounceSave );
-
-		async function saveMemo() {
-			if ( !currentMemoId ) return;
-
-			const title =
-				titleInput.value.trim() ||
-				editor.innerText.split( '\n' )[0]?.trim() || '';
-
-			const content = editor.innerHTML;
-			const updated = Date.now();
-
-			memoCache[currentMemoId] = { title, content, updated };
-
-			await setDoc(
-				doc( db, 'users', auth.currentUser.uid, 'memos', currentMemoId ),
-				{ title, content, updated },
-				{ merge: true }
-			);
-
-			await updateMeta( currentMemoId, { title, updated } );
-		}
-
-		async function saveMeta() {
-			await setDoc(
-				doc( db, 'users', auth.currentUser.uid, 'meta', 'main' ),
-				metaCache
-			);
-		}
-
-		function getMeta( id ) {
-			return metaCache.memos.find( m => m.id === id );
-		}
-
-		async function updateMeta( id, fields ) {
-			const m = getMeta( id );
-			if ( !m ) return;
-			Object.assign( m, fields );
-			await saveMeta();
-		}
-		// updateMeta(currentMemoId, title);
-
-
-		editor.addEventListener('paste', async e => {
-  e.preventDefault();
-  const range = document.getSelection().getRangeAt(0);
-  const items = e.clipboardData.items || [];
-  const files = e.clipboardData.files || [];
-
-  // 画像処理
-  async function processFile(file) {
-    const img = new Image();
-    img.src = URL.createObjectURL(file);
-    await img.decode();
-
-    const maxWidth = 1024;
-    let width = img.width;
-    let height = img.height;
-    if (width > maxWidth) {
-      height = (height / width) * maxWidth;
-      width = maxWidth;
+    /* Preview */
+    function showPreview( id, title, content ) {
+      previewContent.innerHTML = `<strong>${title}</strong><br>${content}`;
+      preview.style.display = 'block';
+      copyBtn.onclick = () => { navigator.clipboard.writeText( content || '' ); showToast( 'Copied' ); }
+      deleteBtn.onclick = async () => {
+        await updateMeta( id, { deleted: true, updated: Date.now() } );
+        preview.style.display = 'none';
+        showToast( 'Moved to Trash' );
+        loadMemos(); // ← これ
+      }
+      closePreview.onclick = () => preview.style.display = 'none';
     }
 
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+    document.getElementById( 'go-trash' ).onclick = () => { location.hash = '#/trash'; }
+    document.getElementById( 'back-list' ).onclick = () => { location.hash = '#/list'; }
+    document.getElementById( 'back' ).onclick = () => { if ( history.length > 1 ) history.back(); else location.hash = '#/list'; }
+    /* New memo button */
+    document.getElementById( 'new-memo' ).onclick = async () => {
+      await loadMetaOnce(); // ← 必ず先に呼ぶ
+      // 本文ドキュメントを1件だけ作る
+      const ref = await addDoc(
+        collection( db, 'users', auth.currentUser.uid, 'memos' ),
+        { title: '', content: '', updated: Date.now() }
+      );
 
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-    const blobUrl = URL.createObjectURL(blob);
+      // meta（目次箱）に追加
+      metaCache.memos.push( {
+        id: ref.id,
+        title: '',
+        updated: Date.now(),
+        deleted: false
+      } );
 
-    const imgEl = document.createElement('img');
-    imgEl.src = blobUrl;
-    range.insertNode(imgEl);
-    range.collapse(false);
+      // meta保存
+      await setDoc(
+        doc( db, 'users', auth.currentUser.uid, 'meta', 'main' ),
+        metaCache
+      );
 
-    saveMemo();
-  }
+      // エディタへ
+      location.hash = `#/editor/${ref.id}`;
+    };
+    /* Navigation */
+    async function navigate() {
+      if ( !auth.currentUser ) {
+        show( 'login' );
+        return;
+      }
 
-  // クリップボード画像
-  for (const item of items) {
-    if (item.type.startsWith('image/')) {
-      await processFile(item.getAsFile());
-      return;
+      const hash = location.hash;
+
+      if ( hash.startsWith( '#/editor/' ) ) {
+        await loadMetaOnce();           // editor だけ
+        const id = hash.split( '/' )[2];
+        if ( id ) await openEditor( id );
+
+      } else if ( hash === '#/trash' ) {
+        await loadMetaOnce();           // trash だけ
+        show( 'trash' );
+        loadTrash();
+
+      } else {
+        await loadMetaOnce();           // list だけ
+        show( 'list' );
+        await loadMemos();
+      }
     }
-  }
 
-  if (files.length > 0 && files[0].type.startsWith('image/')) {
-    await processFile(files[0]);
-    return;
-  }
-
-  // テキスト処理
-  const text = e.clipboardData.getData('text/plain').trim();
-  const url = text;
-
-  const insertEl = (el) => { range.insertNode(el); range.collapse(false); saveMemo(); };
-
-  // TikTok
-  const tiktok = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
-  if (tiktok) {
-    const wrap = document.createElement('div');
-    wrap.className = 'video tiktok';
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://www.tiktok.com/embed/${tiktok[1]}`;
-    iframe.allow = "autoplay; fullscreen";
-    iframe.allowFullscreen = true;
-    wrap.appendChild(iframe);
-    insertEl(wrap);
-    return;
-  }
-
-  // YouTube
-  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/);
-  if (yt) {
-    const wrap = document.createElement('div');
-    wrap.className = 'video youtube';
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://www.youtube-nocookie.com/embed/${yt[1]}?modestbranding=1&rel=0&playsinline=1`;
-    iframe.allow = "autoplay; fullscreen";
-    iframe.allowFullscreen = true;
-    wrap.appendChild(iframe);
-    insertEl(wrap);
-    return;
-  }
-
-  // ニコニコ動画
-  const nico = url.match(/nicovideo\.jp\/watch\/([\w]+)/);
-  if (nico) {
-    const wrap = document.createElement('div');
-    wrap.className = 'video nicovideo';
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', '');
-    iframe.setAttribute('allow', 'fullscreen');
-    wrap.appendChild(iframe);
-    insertEl(wrap);
-    return;
-  }
-
-  // Twitter / X
-  const tw = url.match(/(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/[\w@]+\/status\/(\d+)/i);
-  if (tw) {
-    const wrap = document.createElement('div');
-    wrap.className = 'video twitter';
-    const blockquote = document.createElement('blockquote');
-    blockquote.className = 'twitter-tweet';
-    const a = document.createElement('a');
-    a.href = url.replace(/^https?:\/\/(www\.)?x\.com\//i, 'https://twitter.com/');
-    blockquote.appendChild(a);
-    wrap.appendChild(blockquote);
-    insertEl(wrap);
-    if (window.twttr && window.twttr.widgets) window.twttr.widgets.load(wrap);
-    return;
-  }
-
-  // Instagram
-  const insta = url.match(/https?:\/\/(www\.)?instagram\.com\/p\/([\w-]+)/i);
-  if (insta) {
-    const postUrl = `https://www.instagram.com/p/${insta[2]}/`;
-    const wrap = document.createElement('div');
-    wrap.className = 'video instagram';
-    const blockquote = document.createElement('blockquote');
-    blockquote.className = 'instagram-media';
-    blockquote.setAttribute('data-instgrm-permalink', postUrl);
-    blockquote.setAttribute('data-instgrm-version', '14');
-    wrap.appendChild(blockquote);
-    insertEl(wrap);
-    if (window.instgrm && window.instgrm.Embeds && window.instgrm.Embeds.process) {
-      window.instgrm.Embeds.process(wrap);
-    }
-    return;
-  }
-
-  // 画像URL
-  if (/https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i.test(url)) {
-    const img = document.createElement('img');
-    img.src = url;
-    img.style.cursor = 'pointer';
-    img.addEventListener('click', e => {
-      e.preventDefault(); e.stopPropagation();
-      window.open(url, '_blank', 'noopener');
-    });
-    insertEl(img);
-    return;
-  }
-
-  // 最終的に通常テキストとして挿入
-  insertEl(document.createTextNode(url));
-});
-
-		/* Preview */
-		function showPreview( id, title, content ) {
-			previewContent.innerHTML = `<strong>${title}</strong><br>${content}`;
-			preview.style.display = 'block';
-			copyBtn.onclick = () => { navigator.clipboard.writeText( content || '' ); showToast( 'Copied' ); }
-			deleteBtn.onclick = async () => {
-				await updateMeta( id, { deleted: true, updated: Date.now() } );
-				preview.style.display = 'none';
-				showToast( 'Moved to Trash' );
-				loadMemos(); // ← これ
-			}
-			closePreview.onclick = () => preview.style.display = 'none';
-		}
-
-		document.getElementById( 'go-trash' ).onclick = () => { location.hash = '#/trash'; }
-		document.getElementById( 'back-list' ).onclick = () => { location.hash = '#/list'; }
-		document.getElementById( 'back' ).onclick = () => { if ( history.length > 1 ) history.back(); else location.hash = '#/list'; }
-		/* New memo button */
-		document.getElementById( 'new-memo' ).onclick = async () => {
-			await loadMetaOnce(); // ← 必ず先に呼ぶ
-			// 本文ドキュメントを1件だけ作る
-			const ref = await addDoc(
-				collection( db, 'users', auth.currentUser.uid, 'memos' ),
-				{ title: '', content: '', updated: Date.now() }
-			);
-
-			// meta（目次箱）に追加
-			metaCache.memos.push( {
-				id: ref.id,
-				title: '',
-				updated: Date.now(),
-				deleted: false
-			} );
-
-			// meta保存
-			await setDoc(
-				doc( db, 'users', auth.currentUser.uid, 'meta', 'main' ),
-				metaCache
-			);
-
-			// エディタへ
-			location.hash = `#/editor/${ref.id}`;
-		};
-		/* Navigation */
-		async function navigate() {
-			if ( !auth.currentUser ) {
-				show( 'login' );
-				return;
-			}
-
-			const hash = location.hash;
-
-			if ( hash.startsWith( '#/editor/' ) ) {
-				await loadMetaOnce();           // editor だけ
-				const id = hash.split( '/' )[2];
-				if ( id ) await openEditor( id );
-
-			} else if ( hash === '#/trash' ) {
-				await loadMetaOnce();           // trash だけ
-				show( 'trash' );
-				loadTrash();
-
-			} else {
-				await loadMetaOnce();           // list だけ
-				show( 'list' );
-				await loadMemos();
-			}
-		}
-
-		/* 初期化 */
-		// navigate();
-	</script>
+    /* 初期化 */
+    // navigate();
+  </script>
 </body>
 
 </html>
