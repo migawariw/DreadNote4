@@ -815,6 +815,11 @@
 			titleInput.value = data.title || '';
 			editor.innerHTML = data.content || '';
 			show( 'editor' );
+			// ★ YouTube iframeを再読み込み
+			editor.querySelectorAll( '.video iframe' ).forEach( iframe => {
+				const src = iframe.src;
+				iframe.src = src;
+			} );
 		}
 		let saveTimer = null;
 
