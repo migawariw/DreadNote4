@@ -125,14 +125,14 @@
 		}
 
 		/* TikTok専用 */
-		/* 親要素 */
+
+		/* TikTok 縦長 */
 		.video.tiktok {
 			width: 100%;
-			aspect-ratio: 9 / 16;
-			/* 縦長比率 */
-			max-height: 90vh;
-			/* 画面高さの90%まで */
+			aspect-ratio: 9/16;
+			max-height: 100vh;
 			margin: 12px auto;
+			overflow: hidden;
 		}
 
 		.video.tiktok iframe {
@@ -141,43 +141,39 @@
 			border: 0;
 			display: block;
 			position: static;
-			/* absolute は不要 */
 		}
 
-		/* YouTube Shorts専用 */
+		/* YouTube Shorts 縦長 */
 		.video.youtube.shorts {
-			position: relative;
 			width: 100%;
-			aspect-ratio: 9 / 16;
-			/* 縦長比率 */
-			max-height: 90vh;
-			/* 画面高さの90%まで */
+			aspect-ratio: 9/16;
+			max-height: 100vh;
 			margin: 12px auto;
 		}
 
 		.video.youtube.shorts iframe {
-			position: absolute;
-			inset: 0;
 			width: 100%;
 			height: 100%;
 			border: 0;
+			display: block;
+			position: static;
 		}
 
-		/* YouTube通常動画（横長）はそのまま） */
+		/* 通常 YouTube 横長 */
 		.video.youtube {
-			position: relative;
 			width: 100%;
-			aspect-ratio: 16 / 9;
-			margin: 12px auto;
+			aspect-ratio: 16/9;
+			/* margin: 12px auto; */
 		}
 
 		.video.youtube iframe {
-			position: absolute;
-			inset: 0;
 			width: 100%;
 			height: 100%;
 			border: 0;
+			display: block;
+			position: static;
 		}
+
 
 		.instagram-embed-wrapper {
 			min-height: 400px;
@@ -926,72 +922,14 @@
 			// helper: insert element and collapse
 			const insertEl = ( el ) => { range.insertNode( el ); range.collapse( false ); saveMemo(); };
 
-			// 2-1. YouTube
-			// 2-1. YouTube + Shorts
-			let yt = url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]+)/ );
-			if ( yt ) {
-				const videoId = yt[1];
+			let wrap = document.createElement( 'div' );
+			wrap.className = 'video';  // 初期クラス
 
+			// URLを判定してiframeを作る
+			if ( /tiktok\.com\/.*\/video\/(\d+)/.test( url ) ) {
+				const videoId = url.match( /tiktok\.com\/.*\/video\/(\d+)/ )[1];
 				const wrap = document.createElement( 'div' );
-				wrap.className = 'video youtube'; // 従来通りの YouTube用クラス
-
-				// ★ Shorts判定：URLに /shorts/ が含まれていたら縦長クラス追加
-				if ( /youtube\.com\/shorts\//.test( url ) ) {
-					wrap.classList.add( 'shorts' ); // CSSで aspect-ratio:9/16 が適用される
-				}
-
-				const iframe = document.createElement( 'iframe' );
-				iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?modestbranding=1&rel=0&playsinline=1`;
-				iframe.allow = "autoplay; fullscreen";
-				iframe.allowFullscreen = true;
-
-				wrap.appendChild( iframe );
-				insertEl( wrap );
-				return;
-			}
-
-			// 2-2. ニコニコ動画
-			// ニコニコ動画
-			// ニコニコ動画
-			let nico = url.match( /nicovideo\.jp\/watch\/([\w]+)/ );
-			if ( nico ) {
-				const wrap = document.createElement( 'div' );
-				wrap.className = 'video'; // YouTubeと同じクラス
-
-				const iframe = document.createElement( 'iframe' );
-				iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
-				iframe.setAttribute( 'frameborder', '0' );
-				iframe.setAttribute( 'allowfullscreen', '' ); // ここが重要
-				iframe.setAttribute( 'allow', 'fullscreen' );
-				wrap.appendChild( iframe );
-
-				insertEl( wrap );
-				return;
-			}
-			// 2-3. TikTok
-			// const tiktok = url.match( /https:\/\/(www\.)?tiktok\.com\/.*\/video\/(\d+)/ );
-			// if ( tiktok ) {
-			//   const videoId = tiktok[2];
-			//   const wrap = document.createElement( 'div' );
-			//   wrap.className = 'video';
-
-			//   const iframe = document.createElement( 'iframe' );
-			//   iframe.src = `https://www.tiktok.com/embed/${videoId}`;
-			//   iframe.allow = "autoplay; fullscreen";
-			//   iframe.allowFullscreen = true;
-
-			//   wrap.appendChild( iframe );
-			//   range.insertNode( wrap );
-			//   range.collapse( false );
-			//   saveMemo();
-			//   return;
-			// }
-			let tt = url.match( /tiktok\.com\/.*\/video\/(\d+)/ );
-			if ( tt ) {
-				const videoId = tt[1];
-
-				const wrap = document.createElement( 'div' );
-				wrap.className = 'video tiktok'; // ここがポイント
+				wrap.className = 'video tiktok'; // TikTok専用クラス
 
 				const iframe = document.createElement( 'iframe' );
 				iframe.src = `https://www.tiktok.com/embed/${videoId}`;
@@ -1003,20 +941,53 @@
 				return;
 			}
 
-			// 2-6. 画像
+			let yt = url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]+)/ );
+			if ( yt ) {
+				const videoId = yt[1];
+				const wrap = document.createElement( 'div' );
+				wrap.className = 'video youtube';
 
+				// Shorts判定
+				if ( /youtube\.com\/shorts\//.test( url ) ) wrap.classList.add( 'shorts' );
+
+				const iframe = document.createElement( 'iframe' );
+				iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?modestbranding=1&rel=0&playsinline=1`;
+				iframe.allow = "autoplay; fullscreen";
+				iframe.allowFullscreen = true;
+
+				wrap.appendChild( iframe );
+				insertEl( wrap );
+				return;
+			}
+
+			// ニコニコ動画
+			let nico = url.match( /nicovideo\.jp\/watch\/([\w]+)/ );
+			if ( nico ) {
+				const wrap = document.createElement( 'div' );
+				wrap.className = 'video';
+
+				const iframe = document.createElement( 'iframe' );
+				iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
+				iframe.setAttribute( 'frameborder', '0' );
+				iframe.setAttribute( 'allowfullscreen', '' );
+				iframe.setAttribute( 'allow', 'fullscreen' );
+
+				wrap.appendChild( iframe );
+				insertEl( wrap );
+				return;
+			}
+
+			// 画像
 			const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
 			if ( imgRegex.test( url ) ) {
 				const img = document.createElement( 'img' );
 				img.src = url;
 				img.style.cursor = 'pointer';
-
 				img.addEventListener( 'click', e => {
 					e.preventDefault();
-					e.stopPropagation(); // ← 超重要
+					e.stopPropagation();
 					window.open( url, '_blank', 'noopener' );
 				} );
-
 				insertEl( img );
 				return;
 			}
