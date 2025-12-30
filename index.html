@@ -569,6 +569,37 @@
 			}
 
 			await navigate(); // ← 必ず呼ぶ
+
+      // 過去のYouTubeリンクをiframeに置換
+      async function fixOldYouTubeMemos() {
+        await loadMetaOnce();
+        let changed = false;
+        for (const m of metaCache.memos) {
+          if (!m.deleted && m.id) {
+            const docRef = doc(db, 'users', auth.currentUser.uid, 'memos', m.id);
+            const snap = await getDoc(docRef);
+            const data = snap.data();
+            if (!data || !data.content) continue;
+            let content = data.content;
+            // YouTube URLをiframeに変換
+            const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/g;
+            let replaced = false;
+            content = content.replace(ytRegex, (match, p1) => {
+              replaced = true;
+              return `<div class="video youtube"><iframe src="https://www.youtube-nocookie.com/embed/${p1}?modestbranding=1&rel=0&playsinline=1" allow="autoplay; fullscreen" allowfullscreen></iframe></div>`;
+            });
+            if (replaced) {
+              await setDoc(docRef, { content }, { merge: true });
+              memoCache[m.id] = { ...data, content };
+              changed = true;
+            }
+          }
+        }
+        if (changed) {
+          await loadMemos();
+        }
+      }
+      await fixOldYouTubeMemos();
 		} );
 		window.addEventListener( 'hashchange', () => {
 			if ( !auth.currentUser ) return;
