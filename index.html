@@ -405,6 +405,7 @@
 	</style>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 	<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+	<script async src="https://www.instagram.com/embed.js"></script>
 </head>
 
 <body>
@@ -1115,6 +1116,29 @@
 				// widgets.js で埋め込み生成
 				if ( window.twttr && window.twttr.widgets ) {
 					window.twttr.widgets.load( wrap );
+				}
+
+				return; // 他の処理をスキップ
+			}
+			// 2-10. Instagram
+			let insta = url.match( /https?:\/\/(www\.)?instagram\.com\/p\/([\w-]+)/i );
+			if ( insta ) {
+				const postUrl = insta[0];
+
+				const wrap = document.createElement( 'div' );
+				wrap.className = 'video'; // CSSでレスポンシブ調整可
+
+				const blockquote = document.createElement( 'blockquote' );
+				blockquote.className = 'instagram-media';
+				blockquote.setAttribute( 'data-instgrm-permalink', postUrl );
+				blockquote.setAttribute( 'data-instgrm-version', '14' );
+
+				wrap.appendChild( blockquote );
+				insertEl( wrap );
+
+				// Instagram公式で埋め込みを生成
+				if ( window.instgrm && window.instgrm.Embeds && window.instgrm.Embeds.process ) {
+					window.instgrm.Embeds.process( wrap );
 				}
 
 				return; // 他の処理をスキップ
