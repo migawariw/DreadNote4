@@ -872,282 +872,154 @@
 		// updateMeta(currentMemoId, title);
 
 
-		/* Paste処理（Base64 直接保存版） */
-		editor.addEventListener( 'paste', async e => {
-			e.preventDefault();
-			const range = document.getSelection().getRangeAt( 0 );
-			const items = e.clipboardData.items || [];
-			const files = e.clipboardData.files || [];
+		editor.addEventListener('paste', async e => {
+  e.preventDefault();
+  const range = document.getSelection().getRangeAt(0);
+  const items = e.clipboardData.items || [];
+  const files = e.clipboardData.files || [];
 
-			async function processFile( file ) {
-				const img = new Image();
-				img.src = URL.createObjectURL( file );
-				await img.decode(); // 画像読み込み完了まで待つ
+  // 画像処理
+  async function processFile(file) {
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    await img.decode();
 
-				// リサイズ
-				const maxWidth = 1024;
-				let width = img.width;
-				let height = img.height;
-				if ( width > maxWidth ) {
-					height = ( height / width ) * maxWidth;
-					width = maxWidth;
-				}
+    const maxWidth = 1024;
+    let width = img.width;
+    let height = img.height;
+    if (width > maxWidth) {
+      height = (height / width) * maxWidth;
+      width = maxWidth;
+    }
 
-				const canvas = document.createElement( 'canvas' );
-				canvas.width = width;
-				canvas.height = height;
-				const ctx = canvas.getContext( '2d' );
-				ctx.drawImage( img, 0, 0, width, height );
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-				// Canvas → Blob に変換
-				const blob = await new Promise( resolve => canvas.toBlob( resolve, 'image/jpeg', 0.8 ) );
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+    const blobUrl = URL.createObjectURL(blob);
 
-				// Blob → URL
-				const blobUrl = URL.createObjectURL( blob );
+    const imgEl = document.createElement('img');
+    imgEl.src = blobUrl;
+    range.insertNode(imgEl);
+    range.collapse(false);
 
-				// 挿入
-				const imgEl = document.createElement( 'img' );
-				imgEl.src = blobUrl;
-				range.insertNode( imgEl );
-				range.collapse( false );
+    saveMemo();
+  }
 
-				saveMemo();
-			}
+  // クリップボード画像
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      await processFile(item.getAsFile());
+      return;
+    }
+  }
 
-			// クリップボードの items から画像を探す
-			for ( const item of items ) {
-				if ( item.type.startsWith( 'image/' ) ) {
-					const file = item.getAsFile();
-					await processFile( file );
-					return;
-				}
-			}
+  if (files.length > 0 && files[0].type.startsWith('image/')) {
+    await processFile(files[0]);
+    return;
+  }
 
-			// files から画像を探す
-			if ( files.length > 0 && files[0].type.startsWith( 'image/' ) ) {
-				await processFile( files[0] );
-				return;
-			}
+  // テキスト処理
+  const text = e.clipboardData.getData('text/plain').trim();
+  const url = text;
 
-			// 2️⃣ テキスト処理
-			const text = e.clipboardData.getData( 'text/plain' );
-			const url = text.trim();
+  const insertEl = (el) => { range.insertNode(el); range.collapse(false); saveMemo(); };
 
-			// helper: insert element and collapse
-			const insertEl = ( el ) => { range.insertNode( el ); range.collapse( false ); saveMemo(); };
+  // TikTok
+  const tiktok = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
+  if (tiktok) {
+    const wrap = document.createElement('div');
+    wrap.className = 'video tiktok';
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.tiktok.com/embed/${tiktok[1]}`;
+    iframe.allow = "autoplay; fullscreen";
+    iframe.allowFullscreen = true;
+    wrap.appendChild(iframe);
+    insertEl(wrap);
+    return;
+  }
 
-			let wrap = document.createElement( 'div' );
-			wrap.className = 'video';  // 初期クラス
+  // YouTube
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/);
+  if (yt) {
+    const wrap = document.createElement('div');
+    wrap.className = 'video youtube';
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${yt[1]}?modestbranding=1&rel=0&playsinline=1`;
+    iframe.allow = "autoplay; fullscreen";
+    iframe.allowFullscreen = true;
+    wrap.appendChild(iframe);
+    insertEl(wrap);
+    return;
+  }
 
-			// URLを判定してiframeを作る
-			if ( /tiktok\.com\/.*\/video\/(\d+)/.test( url ) ) {
-				const videoId = url.match( /tiktok\.com\/.*\/video\/(\d+)/ )[1];
-				const wrap = document.createElement( 'div' );
-				wrap.className = 'video tiktok'; // TikTok専用クラス
+  // ニコニコ動画
+  const nico = url.match(/nicovideo\.jp\/watch\/([\w]+)/);
+  if (nico) {
+    const wrap = document.createElement('div');
+    wrap.className = 'video nicovideo';
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute('allow', 'fullscreen');
+    wrap.appendChild(iframe);
+    insertEl(wrap);
+    return;
+  }
 
-				const iframe = document.createElement( 'iframe' );
-				iframe.src = `https://www.tiktok.com/embed/${videoId}`;
-				iframe.allow = "autoplay; fullscreen";
-				iframe.allowFullscreen = true;
+  // Twitter / X
+  const tw = url.match(/(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/[\w@]+\/status\/(\d+)/i);
+  if (tw) {
+    const wrap = document.createElement('div');
+    wrap.className = 'video twitter';
+    const blockquote = document.createElement('blockquote');
+    blockquote.className = 'twitter-tweet';
+    const a = document.createElement('a');
+    a.href = url.replace(/^https?:\/\/(www\.)?x\.com\//i, 'https://twitter.com/');
+    blockquote.appendChild(a);
+    wrap.appendChild(blockquote);
+    insertEl(wrap);
+    if (window.twttr && window.twttr.widgets) window.twttr.widgets.load(wrap);
+    return;
+  }
 
-				wrap.appendChild( iframe );
-				insertEl( wrap );
-				return;
-			}
+  // Instagram
+  const insta = url.match(/https?:\/\/(www\.)?instagram\.com\/p\/([\w-]+)/i);
+  if (insta) {
+    const postUrl = `https://www.instagram.com/p/${insta[2]}/`;
+    const wrap = document.createElement('div');
+    wrap.className = 'video instagram';
+    const blockquote = document.createElement('blockquote');
+    blockquote.className = 'instagram-media';
+    blockquote.setAttribute('data-instgrm-permalink', postUrl);
+    blockquote.setAttribute('data-instgrm-version', '14');
+    wrap.appendChild(blockquote);
+    insertEl(wrap);
+    if (window.instgrm && window.instgrm.Embeds && window.instgrm.Embeds.process) {
+      window.instgrm.Embeds.process(wrap);
+    }
+    return;
+  }
 
-			// 2-1. YouTube
-			let yt = url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/ );
-			if ( yt ) {
-				const wrap = document.createElement( 'div' );
-				wrap.className = 'video'; // 16:9固定でOK
+  // 画像URL
+  if (/https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i.test(url)) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.cursor = 'pointer';
+    img.addEventListener('click', e => {
+      e.preventDefault(); e.stopPropagation();
+      window.open(url, '_blank', 'noopener');
+    });
+    insertEl(img);
+    return;
+  }
 
-				const iframe = document.createElement( 'iframe' );
-				iframe.src = `https://www.youtube-nocookie.com/embed/${yt[1]}?modestbranding=1&rel=0&playsinline=1`;
-				iframe.allow = "autoplay; fullscreen";
-				iframe.allowFullscreen = true;
-
-				wrap.appendChild( iframe );
-				insertEl( wrap );
-				return;
-			}
-
-			// ニコニコ動画
-			let nico = url.match( /nicovideo\.jp\/watch\/([\w]+)/ );
-			if ( nico ) {
-				const wrap = document.createElement( 'div' );
-				wrap.className = 'video youtube';
-
-				const iframe = document.createElement( 'iframe' );
-				iframe.src = `https://embed.nicovideo.jp/watch/${nico[1]}`;
-				iframe.setAttribute( 'frameborder', '0' );
-				iframe.setAttribute( 'allowfullscreen', '' );
-				iframe.setAttribute( 'allow', 'fullscreen' );
-
-				wrap.appendChild( iframe );
-				insertEl( wrap );
-				return;
-			}
-
-			// 画像
-			const imgRegex = /https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
-			if ( imgRegex.test( url ) ) {
-				const img = document.createElement( 'img' );
-				img.src = url;
-				img.style.cursor = 'pointer';
-				img.addEventListener( 'click', e => {
-					e.preventDefault();
-					e.stopPropagation();
-					window.open( url, '_blank', 'noopener' );
-				} );
-				insertEl( img );
-				return;
-			}
-
-			//   // 2-7. 通常URL（カード＋生URL表示）
-			//   const linkRegex = /^https?:\/\/\S+$/;
-			//   if ( linkRegex.test( url ) ) {
-			//     const container = document.createElement( 'div' );
-			//     container.style.margin = '8px 0';
-
-			//     // カード本体
-			//     const card = document.createElement( 'div' );
-			//     card.style.border = '1px solid #ddd';
-			//     card.style.borderRadius = '6px';
-			//     card.style.padding = '8px';
-			//     card.style.display = 'flex';
-			//     card.style.alignItems = 'center';
-			//     card.style.gap = '8px';
-			//     card.style.cursor = 'pointer';
-			//     card.contentEditable = false;
-
-			//     const icon = document.createElement( 'img' );
-			//     icon.src = 'https://www.google.com/s2/favicons?domain=' + url;
-			//     icon.width = 16;
-			//     icon.height = 16;
-
-			//     const titleSpan = document.createElement( 'span' );
-			//     titleSpan.style.fontWeight = 'bold';
-			//     titleSpan.style.fontSize = '0.9em';
-			//     titleSpan.style.overflow = 'hidden';
-			//     titleSpan.style.textOverflow = 'ellipsis';
-			//     titleSpan.style.whiteSpace = 'nowrap';
-
-			//     // タイトル取得（失敗したら必ずホスト名）
-			//     ( async () => {
-			//       let text = '';
-
-			//       try {
-			//         const res = await fetch( url, { mode: 'cors' } );
-			//         const html = await res.text();
-			//         const doc = new DOMParser().parseFromString( html, 'text/html' );
-			//         const title = doc.querySelector( 'title' )?.innerText?.trim();
-			//         if ( title ) text = title;
-			//       } catch { }
-
-			//       // フォールバック：ホスト名
-			//       if ( !text ) {
-			//         try {
-			//           text = new URL( url ).hostname;
-			//         } catch { }
-			//       }
-
-			//       if ( text ) {
-			//         titleSpan.textContent = text;
-			//         titleSpan.style.display = '';
-			//       } else {
-			//         titleSpan.style.display = 'none';
-			//       }
-			//     } )();
-
-			//     card.append( icon, titleSpan );
-
-			//     card.addEventListener( 'click', e => {
-			//       e.preventDefault();
-			//       e.stopPropagation();
-			//       window.open( url, '_blank', 'noopener' );
-			//     } );
-
-			//     // 生リンク（いじらない）
-			//     const linkLine = document.createElement( 'a' );
-			//     linkLine.href = url;
-			//     linkLine.textContent = url;
-			//     linkLine.target = '_blank';
-			//     linkLine.rel = 'noopener';
-			//     linkLine.style.display = 'block';
-			//     linkLine.style.marginTop = '4px';
-
-			//     container.append( card, linkLine );
-			//     insertEl( container );
-			//     return;
-			//   }
-			// 2-9. Twitter / X
-			let tw = url.match( /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/[\w@]+\/status\/(\d+)/i );
-			if ( tw ) {
-				let tweetId = tw[1];
-
-				const wrap = document.createElement( 'div' );
-				wrap.className = 'video twitter'; // ← YouTube 用ではなく Twitter 用クラス
-
-				const blockquote = document.createElement( 'blockquote' );
-				blockquote.className = 'twitter-tweet';
-				const a = document.createElement( 'a' );
-
-				// x.com のURLを twitter.com に変換
-				let tweetUrl = url.replace( /^https?:\/\/(www\.)?x\.com\//i, 'https://twitter.com/' );
-				a.href = tweetUrl;
-
-				blockquote.appendChild( a );
-				wrap.appendChild( blockquote );
-				insertEl( wrap );
-
-				// widgets.js で埋め込み生成
-				if ( window.twttr && window.twttr.widgets ) {
-					window.twttr.widgets.load( wrap );
-				}
-
-				return; // 他の処理をスキップ
-			}
-			// 2-10. Instagram
-			// --- Instagram 埋め込み処理 ---
-			let insta = text.match( /https?:\/\/(www\.)?instagram\.com\/p\/([\w-]+)/i );
-			if ( insta ) {
-				// 投稿IDだけ抽出して余計なパラメータを削除
-				const postUrl = `https://www.instagram.com/p/${insta[2]}/`;
-
-				const wrap = document.createElement( 'div' );
-				wrap.className = 'video'; // CSSで幅100%などを設定
-
-				const blockquote = document.createElement( 'blockquote' );
-				blockquote.className = 'instagram-media';
-				blockquote.setAttribute( 'data-instgrm-permalink', postUrl );
-				blockquote.setAttribute( 'data-instgrm-version', '14' );
-
-				wrap.appendChild( blockquote );
-				insertEl( wrap ); // 既存の insertEl 関数を使用
-
-				// Instagram公式スクリプトで埋め込み生成
-				if ( window.instgrm && window.instgrm.Embeds && window.instgrm.Embeds.process ) {
-					window.instgrm.Embeds.process( wrap );
-				}
-
-				return; // 他の処理をスキップ
-			}
-			//   // 2-8. 通常テキスト
-			insertEl( document.createTextNode( url ) );
-		} );
-
-		// // contenteditable 内のリンクを再表示後も確実に開けるようにする
-		// editor.addEventListener( 'click', e => {
-		//   const a = e.target.closest( 'a' );
-		//   if ( !a ) return;
-
-		//   const href = a.getAttribute( 'href' );
-		//   if ( !href ) return;
-
-		//   e.preventDefault();
-		//   e.stopPropagation();
-		//   window.open( href, '_blank', 'noopener' );
-		// } );
+  // 最終的に通常テキストとして挿入
+  insertEl(document.createTextNode(url));
+});
 
 		/* Preview */
 		function showPreview( id, title, content ) {
