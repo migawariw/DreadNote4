@@ -942,14 +942,20 @@
 				return;
 			}
 
-			let yt = url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]+)/ );
+			// YouTube URL判定
+			let yt = url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/ );
 			if ( yt ) {
 				const videoId = yt[1];
+
+				// ラッパー作成
 				const wrap = document.createElement( 'div' );
-				wrap.className = 'video youtube';
 
 				// Shorts判定
-				if ( /youtube\.com\/shorts\//.test( url ) ) wrap.classList.add( 'shorts' );
+				if ( /youtube\.com\/shorts\//.test( url ) ) {
+					wrap.className = 'video youtube shorts'; // 縦長
+				} else {
+					wrap.className = 'video youtube'; // 横長
+				}
 
 				const iframe = document.createElement( 'iframe' );
 				iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?modestbranding=1&rel=0&playsinline=1`;
@@ -957,7 +963,12 @@
 				iframe.allowFullscreen = true;
 
 				wrap.appendChild( iframe );
-				insertEl( wrap );
+
+				// editorに追加
+				editor.appendChild( wrap );
+				wrap.scrollIntoView( { behavior: 'smooth' } );
+
+				saveMemo();
 				return;
 			}
 
