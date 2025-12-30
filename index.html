@@ -1121,12 +1121,14 @@
 				return; // 他の処理をスキップ
 			}
 			// 2-10. Instagram
-			let insta = url.match( /https?:\/\/(www\.)?instagram\.com\/p\/([\w-]+)/i );
+			// --- Instagram 埋め込み処理 ---
+			let insta = text.match( /https?:\/\/(www\.)?instagram\.com\/p\/([\w-]+)/i );
 			if ( insta ) {
-				const postUrl = insta[0];
+				// 投稿IDだけ抽出して余計なパラメータを削除
+				const postUrl = `https://www.instagram.com/p/${insta[2]}/`;
 
 				const wrap = document.createElement( 'div' );
-				wrap.className = 'video'; // CSSでレスポンシブ調整可
+				wrap.className = 'video'; // CSSで幅100%などを設定
 
 				const blockquote = document.createElement( 'blockquote' );
 				blockquote.className = 'instagram-media';
@@ -1134,9 +1136,9 @@
 				blockquote.setAttribute( 'data-instgrm-version', '14' );
 
 				wrap.appendChild( blockquote );
-				insertEl( wrap );
+				insertEl( wrap ); // 既存の insertEl 関数を使用
 
-				// Instagram公式で埋め込みを生成
+				// Instagram公式スクリプトで埋め込み生成
 				if ( window.instgrm && window.instgrm.Embeds && window.instgrm.Embeds.process ) {
 					window.instgrm.Embeds.process( wrap );
 				}
